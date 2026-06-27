@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mountain Trek — an immersive parallax scrolling journey through six stages of elevation, from forest base at 1,200m to alpine summit at 4,200m. Built with GSAP ScrollTrigger.">
+  <meta name="theme-color" content="#2D4A22">
+
+  <title>Mountain Trek — Forest to Summit</title>
+
+  <!-- Canonical -->
+  <link rel="canonical" href="/">
+
+  <!--
+    TYPOGRAPHY — Three-face system, scoped by role:
+      Fraunces  → display headings ONLY (leads visually)
+      Alegreya  → body paragraphs + subheadings (supports)
+      DM Mono   → altitude readout + labels ONLY (stays incidental)
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Alegreya:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!--
+    ═══════════════════════════════════════════════════════
+    FIXED UI — Altitude HUD
+    A vertical track on the right edge of the viewport.
+    The fill + marker animate up as you scroll.
+    Phase 5: the dot marker becomes a hiker SVG silhouette.
+    ═══════════════════════════════════════════════════════
+  -->
+  <aside class="altitude-hud" id="altitude-hud" aria-label="Current altitude tracker">
+    <span class="altitude-hud__label">ALT</span>
+    <div class="altitude-hud__track" role="progressbar" aria-valuemin="1200" aria-valuemax="4200" aria-valuenow="1200" aria-label="Altitude progress">
+      <div class="altitude-hud__fill"   id="js-hud-fill"   aria-hidden="true"></div>
+      <div class="altitude-hud__marker" id="js-hud-marker" aria-hidden="true">
+        <!--
+          Phase 5: Replace .altitude-hud__dot with inline SVG hiker silhouette.
+          Keep the wrapper div — JS targets it for position updates.
+        -->
+        <div class="altitude-hud__dot"></div>
+      </div>
+    </div>
+    <div class="altitude-hud__readout" aria-live="polite" aria-atomic="true">
+      <span class="altitude-hud__value" id="js-altitude-value">1,200</span><span class="altitude-hud__unit">m</span>
+    </div>
+  </aside>
+
+  <!--
+    SCROLL PROGRESS — thin gold bar at top of viewport
+  -->
+  <div class="scroll-progress" id="js-scroll-progress" aria-hidden="true">
+    <div class="scroll-progress__fill" id="js-progress-fill"></div>
+  </div>
+
+
+  <!--
+    ═══════════════════════════════════════════════════════
+    MAIN CONTENT — 6 Scenes
+    Each section follows the same structure:
+      .scene__layers  → SVG parallax layers (Phase 3)
+      .scene__content → typography block (Phase 2 — current)
+    ═══════════════════════════════════════════════════════
+  -->
+  <main id="main">
+
+
+    <!-- ─── SCENE 1 · FOREST BASE ──────────────────────────────
+         Elevation 1,200m  |  Mood: deep green, warm amber light
+         Background: distant mountain silhouette
+         Midground:  treeline, hut
+         Foreground: tall pines, trail signpost
+    ─────────────────────────────────────────────────────────── -->
+    <section class="scene scene--forest" id="scene-forest" aria-label="Stage 1 — Forest Base">
+
+      <!-- Phase 3: Three SVG layers injected here -->
+      <div class="scene__layers" aria-hidden="true" id="layers-forest"></div>
+
+      <div class="scene__content">
+        <p class="scene__tag" aria-label="Stage 1 of 6, elevation 1200 metres">
+          <span class="scene__stage">Stage 01</span>
+          <span class="scene__sep" aria-hidden="true">·</span>
+          <span class="scene__elev">1,200<abbr class="scene__unit" title="metres">m</abbr></span>
+        </p>
+        <!-- h1: the page's single SEO heading — trailhead is where it all begins -->
+        <h1 class="scene__heading">The Trailhead</h1>
+        <p class="scene__subheading">Where the forest swallows the path</p>
+        <p class="scene__body">
+          The sign at the trailhead is weathered beyond easy reading.
+          Someone has carved their initials into the wooden post below it.
+          The pines grow so close together that even midday light arrives
+          as thin, amber needles through the canopy.
+          The air smells of resin and cold earth.
+          You tighten your straps and begin.
+        </p>
+      </div>
+    </section>
+
+
+    <!-- ─── SCENE 2 · FOOTHILLS ────────────────────────────────
+         Elevation 1,800m  |  Mood: olive/earth tones, first view
+         Background: mountain range layers
+         Midground:  rolling hills
+         Foreground: rocks, hiking path
+    ─────────────────────────────────────────────────────────── -->
+    <section class="scene scene--foothills" id="scene-foothills" aria-label="Stage 2 — Foothills">
+
+      <div class="scene__layers" aria-hidden="true" id="layers-foothills"></div>
+
+      <div class="scene__content">
+        <p class="scene__tag" aria-label="Stage 2 of 6, elevation 1800 metres">
+          <span class="scene__stage">Stage 02</span>
+          <span class="scene__sep" aria-hidden="true">·</span>
+          <span class="scene__elev">1,800<abbr class="scene__unit" title="metres">m</abbr></span>
+        </p>
+        <h2 class="scene__heading">The Foothills Open</h2>
+        <p class="scene__subheading">The range reveals itself for the first time</p>
+        <p class="scene__body">
+          Above the treeline's first shelf, the path flattens and you turn to look back.
+          The valley is already small. Ahead, the main range emerges from its own shadow —
+          ridge after ridge folded into distance, each a paler shade of itself.
+          You count four visible layers.
+          The summit is somewhere behind the last one.
+        </p>
+      </div>
+    </section>
+
+
+    <!-- ─── SCENE 3 · ROCKY ASCENT ─────────────────────────────
+         Elevation 2,600m  |  Mood: grey-brown, harsher light
+         Background: far peaks, cloud bank
+         Midground:  cliffs, switchback trail
+         Foreground: boulders, loose scree
+    ─────────────────────────────────────────────────────────── -->
+    <section class="scene scene--ascent" id="scene-ascent" aria-label="Stage 3 — Rocky Ascent">
+
+      <div class="scene__layers" aria-hidden="true" id="layers-ascent"></div>
+
+      <div class="scene__content">
+        <p class="scene__tag" aria-label="Stage 3 of 6, elevation 2600 metres">
+          <span class="scene__stage">Stage 03</span>
+          <span class="scene__sep" aria-hidden="true">·</span>
+          <span class="scene__elev">2,600<abbr class="scene__unit" title="metres">m</abbr></span>
+        </p>
+        <h2 class="scene__heading">The Rock Begins</h2>
+        <p class="scene__subheading">No more soil. Only stone.</p>
+        <p class="scene__body">
+          The switchbacks here are brutal and honest — no shortcuts, no shorthand.
+          Each hairpin gains thirty metres of altitude and costs ten minutes of breath.
+          Vegetation is gone except for sparse, tough grass in the crack lines.
+          Above the next crest: grey sky and darker grey rock,
+          and the sound of your own footsteps becoming very loud.
+        </p>
+      </div>
+    </section>
+
+
+    <!-- ─── SCENE 4 · CLOUD LAYER ──────────────────────────────
+         Elevation 3,200m  |  Mood: soft white-grey, diffused
+         Background: sun breaking through
+         Midground:  drifting mist layers
+         Foreground: rocky outcrop edge
+         NOTE: light background — text flips to dark
+    ─────────────────────────────────────────────────────────── -->
+    <section class="scene scene--clouds" id="scene-clouds" aria-label="Stage 4 — Cloud Layer">
+
+      <div class="scene__layers" aria-hidden="true" id="layers-clouds"></div>
+
+      <div class="scene__content scene__content--on-light">
+        <p class="scene__tag" aria-label="Stage 4 of 6, elevation 3200 metres">
+          <span class="scene__stage">Stage 04</span>
+          <span class="scene__sep" aria-hidden="true">·</span>
+          <span class="scene__elev">3,200<abbr class="scene__unit" title="metres">m</abbr></span>
+        </p>
+        <h2 class="scene__heading">Into the White</h2>
+        <p class="scene__subheading">The clouds have a floor and you have crossed it</p>
+        <p class="scene__body">
+          Visibility contracts to fifty metres, then thirty.
+          The light becomes sourceless — bright everywhere, from nowhere.
+          You cannot tell where rock ends and cloud begins.
+          Then, for thirty seconds, the mist parts and the sun falls through in a single column,
+          illuminating a ridge two hundred metres away as if it were a stage set.
+          Then the curtain closes again.
+        </p>
+      </div>
+    </section>
+
+
+    <!-- ─── SCENE 5 · SNOWLINE ─────────────────────────────────
+         Elevation 3,800m  |  Mood: cool blues/whites, alpine cold
+         Background: jagged peaks, pale sky
+         Midground:  snow-capped ridges
+         Foreground: snow patches, ice formations
+         NOTE: cool light background — text stays dark
+    ─────────────────────────────────────────────────────────── -->
+    <section class="scene scene--snowline" id="scene-snowline" aria-label="Stage 5 — Snowline">
+
+      <div class="scene__layers" aria-hidden="true" id="layers-snowline"></div>
+
+      <div class="scene__content scene__content--on-light">
+        <p class="scene__tag" aria-label="Stage 5 of 6, elevation 3800 metres">
+          <span class="scene__stage">Stage 05</span>
+          <span class="scene__sep" aria-hidden="true">·</span>
+          <span class="scene__elev">3,800<abbr class="scene__unit" title="metres">m</abbr></span>
+        </p>
+        <h2 class="scene__heading">The Snowline</h2>
+        <p class="scene__subheading">Permanent ice. The cold is structural now.</p>
+        <p class="scene__body">
+          The first patches appear in north-facing gullies, thin and hard.
+          By this altitude they are continuous.
+          Your footprints are the only ones today.
+          The rock beneath is glassy with old ice and the silence has a different quality —
+          less the absence of sound than the presence of something else entirely.
+          The peaks above are very clear, very close, and very far.
+        </p>
+      </div>
+    </section>
+
+
+    <!-- ─── SCENE 6 · SUMMIT ────────────────────────────────────
+         Elevation 4,200m  |  Mood: gold, pink, triumphant
+         Background: sky, sunrise/golden light
+         Midground:  distant peak silhouettes below
+         Foreground: cairn, flag, climber's view
+         NOTE: summit-gold is ONLY used here
+    ─────────────────────────────────────────────────────────── -->
+    <section class="scene scene--summit" id="scene-summit" aria-label="Stage 6 — Summit">
+
+      <div class="scene__layers" aria-hidden="true" id="layers-summit"></div>
+
+      <div class="scene__content">
+        <p class="scene__tag" aria-label="Summit reached, elevation 4200 metres">
+          <span class="scene__stage">Summit</span>
+          <span class="scene__sep" aria-hidden="true">·</span>
+          <span class="scene__elev">4,200<abbr class="scene__unit" title="metres">m</abbr></span>
+        </p>
+        <!-- Summit heading uses --summit-gold — the payoff color, reserved only for this moment -->
+        <h2 class="scene__heading scene__heading--summit">The Summit</h2>
+        <p class="scene__subheading scene__subheading--summit">
+          Everything below is the world. You are above it.
+        </p>
+        <p class="scene__body">
+          The cairn is larger than expected, built by many hands over many years.
+          You add your stone. The horizon is so wide and so far below that it curves —
+          or you imagine it does. The sun, barely risen, turns the snowfield below
+          into hammered gold.
+          There is no wind at this exact moment.
+          You allow yourself to stand still.
+        </p>
+
+        <!-- Summit stats — DM Mono, numerical data only -->
+        <div class="summit-stats" aria-label="Trek statistics">
+          <div class="summit-stat">
+            <span class="summit-stat__value">3,000</span>
+            <span class="summit-stat__label">metres ascent</span>
+          </div>
+          <div class="summit-stat">
+            <span class="summit-stat__value">6</span>
+            <span class="summit-stat__label">stages</span>
+          </div>
+          <div class="summit-stat">
+            <span class="summit-stat__value">4,200</span>
+            <span class="summit-stat__label">metres altitude</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+  </main><!-- /#main -->
+
+
+  <!--
+    ═══════════════════════════════════════════════════════
+    PHASE 4: GSAP + ScrollTrigger (CDN — uncomment when ready)
+    ═══════════════════════════════════════════════════════
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    PHASE 7: Lenis smooth scroll (CDN — uncomment when ready)
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  -->
+
+  <script src="js/main.js"></script>
+
+</body>
+</html>
