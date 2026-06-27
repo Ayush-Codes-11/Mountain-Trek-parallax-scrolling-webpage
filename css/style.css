@@ -160,10 +160,12 @@ body {
                                taller due to larger heading + summit stats).
                                200vh also gives SVG layers real vertical travel
                                room for the parallax offset (±20% BG range). */
-  overflow:   hidden;
-  display:    flex;
-  align-items: flex-end;    /* content anchors to bottom; upper area for SVG layers */
-  padding:    var(--scene-pad-y) var(--scene-pad-x);
+
+  /* overflow: hidden REMOVED — it breaks position: sticky on .scene__content.
+     SVG layer overflow is now clipped by overflow: hidden on .scene__layers. */
+
+  /* display: flex + padding REMOVED — layout control moved into .scene__content
+     so the sticky wrapper owns its own spacing. */
 }
 
 /*
@@ -177,6 +179,9 @@ body {
   inset:          0;
   pointer-events: none;
   z-index:        1;
+  overflow:       hidden; /* clips parallax-shifted SVGs to section bounds.
+                             Replaces overflow: hidden on .scene (which would
+                             break position: sticky on .scene__content). */
 }
 
 /*
@@ -243,19 +248,48 @@ body {
 .scene--summit   .layer--fg { opacity: 1.00; }
 
 /*
-  Content block.
-  Anchored lower-left, in front of all SVG layers.
-  Upper section area (above the content block) is visually open
-  — this is intentional: SVG mountain silhouettes will live there.
+  Content block — STICKY VIEWPORT ANCHOR (Phase 4 layout fix).
+
+  position: sticky; top: 0; height: 100vh
+    → The content panel sticks to the TOP of the viewport the moment the
+      section scrolls into view, and stays pinned there for the remaining
+      100vh of the section's 200vh scroll distance.
+    → "World moves past fixed text" feel — the standard scroll-narrative
+      pattern for tall parallax sections.
+    → Removes the empty-space-above-text problem that occurred when content
+      was flex-end-anchored to the bottom of a 200vh section.
+
+  The sticky element has width: 100% so it spans the full section width.
+  Text width is constrained via max-width on direct children (see below).
+
+  z-index: 10 keeps text above SVG layers (z-index 1–4) and bleed (z-index 5)
+  without needing the section to be a stacking context — the sticky element
+  itself creates one via position + z-index.
+
+  GSAP/Lenis compatibility: position: sticky is entirely CSS-driven;
+  GSAP's ScrollTrigger still tracks the section element as trigger,
+  and the parallax tweens on .layer elements are unaffected.
 */
 .scene__content {
-  position:       relative;
-  z-index:        10;
-  width:          var(--content-width);
-  display:        flex;
-  flex-direction: column;
-  gap:            1.20rem;
-  color:          var(--text-on-dark); /* default: dark bg sections */
+  position:        sticky;
+  top:             0;
+  height:          100vh;
+  width:           100%;
+  display:         flex;
+  flex-direction:  column;
+  justify-content: flex-end;   /* text anchors to bottom of viewport — matches Phase 1 design */
+  align-items:     flex-start; /* left-aligned */
+  padding:         var(--scene-pad-y) var(--scene-pad-x); /* moved from .scene */
+  gap:             1.20rem;
+  z-index:         10;
+  color:           var(--text-on-dark); /* default: dark-bg sections */
+  box-sizing:      border-box;
+}
+
+/* Constrain text line-length within the full-width sticky panel.
+   Applies to all direct children: tag, heading, subheading, body, stats. */
+.scene__content > * {
+  max-width: var(--content-width);
 }
 
 /* Modifier: light-bg sections (clouds, snowline) flip text to dark */
