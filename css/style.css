@@ -153,7 +153,13 @@ body {
 
 .scene {
   position:   relative;
-  min-height: 100vh;        /* Phase 4: may increase to 150vh for layer travel room */
+  min-height: 200vh;        /* Phase 4 fix: 200vh = consistent scroll investment
+                               across all sections. At 100vh, a single Lenis
+                               gesture covered an entire section (Sections 2-5
+                               appeared to "fly past" vs Section 1/6 which were
+                               taller due to larger heading + summit stats).
+                               200vh also gives SVG layers real vertical travel
+                               room for the parallax offset (±20% BG range). */
   overflow:   hidden;
   display:    flex;
   align-items: flex-end;    /* content anchors to bottom; upper area for SVG layers */

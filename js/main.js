@@ -258,7 +258,7 @@ function initColorBleeds() {
         ease: 'none',
         scrollTrigger: {
           trigger:            '#scene-foothills',
-          start:              'top 80%',
+          start:              'top 60%',   // recalibrated for 200vh sections
           end:                'top top',
           scrub:              true,
           invalidateOnRefresh: true,
