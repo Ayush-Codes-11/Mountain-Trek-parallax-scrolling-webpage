@@ -184,6 +184,13 @@
 
       </div><!-- /#layers-forest -->
 
+      <!--
+        Color bleed overlay — GSAP scrubs opacity 0→1 as Section 2 enters.
+        Gradient bleeds foothills' warm tan sky into Section 1's bottom edge.
+        z-index: 5 — above SVG layers (2–4), below content text (10).
+      -->
+      <div class="scene__bleed" aria-hidden="true"></div>
+
       <div class="scene__content">
         <p class="scene__tag" aria-label="Stage 1 of 6, elevation 1200 metres">
           <span class="scene__stage">Stage 01</span>
@@ -795,14 +802,13 @@
   </main><!-- /#main -->
 
 
-  <!--
-    PHASE 4: GSAP + ScrollTrigger (CDN — uncomment when ready)
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- GSAP 3 + ScrollTrigger — Phase 4 (parallax mechanics) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-    PHASE 7: Lenis smooth scroll (CDN — uncomment when ready)
-    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
-  -->
+  <!-- Lenis smooth scroll — Phase 4 (smooth-scroll base feel) -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
   <script src="js/main.js"></script>
 
 </body>

@@ -319,9 +319,35 @@ h1.scene__heading {
 /*
   Each gradient is derived from the palette token for that elevation.
   Warm → earthy → grey → light mist → cool blue → deep sky.
-  Hard section cuts are intentional in Phase 2;
-  smooth crossfades will be added in Phase 6 (polish).
+  Phase 4 adds .scene__bleed for scroll-scrubbed color crossfades.
 */
+
+/* ── Color bleed overlay (Phase 4 addition) ─────────────────────────
+   One .scene__bleed per section (except last).
+   Absolutely positioned at the section bottom.
+   Contains a gradient toward the NEXT section's top color.
+   GSAP scrubs opacity 0→1 as the next section enters the viewport,
+   so section boundaries feel like a color bleed rather than a hard cut.
+
+   z-index: 5 → above all SVG layers (z-index 2-4 within scene__layers
+   stacking context), but below scene__content (z-index: 10).
+*/
+.scene__bleed {
+  position:       absolute;
+  bottom:         0;
+  left:           0;
+  width:          100%;
+  height:         18vh;
+  pointer-events: none;
+  z-index:        5;
+  opacity:        0;   /* GSAP animates this 0 → 1 */
+}
+
+/* Section 1 → Section 2: forest dark floor bleeds to foothills warm sky */
+.scene--forest .scene__bleed {
+  background: linear-gradient(to bottom, transparent, #C8B08A);
+}
+/* Sections 2-5 bleeds: added to HTML in Phase 4.2 after Section 1 approval */
 
 /* SECTION 1: Forest Base
    Top = lighter sky-green so tree silhouettes contrast against it
