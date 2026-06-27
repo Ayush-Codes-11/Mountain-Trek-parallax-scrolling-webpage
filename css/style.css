@@ -163,7 +163,7 @@ body {
 /*
   SVG layer container.
   Position: absolute, fills the scene entirely.
-  z-index 1 — sits above gradient bg, below content.
+  z-index 1 — creates stacking context for .layer children.
   Phase 3: background/midground/foreground SVG silhouettes injected here.
 */
 .scene__layers {
@@ -172,6 +172,69 @@ body {
   pointer-events: none;
   z-index:        1;
 }
+
+/*
+  ── LAYER SYSTEM (Phase 3 addition) ───────────────────────
+  Three layers per section: .layer--bg / .layer--mg / .layer--fg
+  All absolutely positioned, filling the full section area.
+  SVG inside each fills 100%×100%.
+
+  DEPTH DIFFERENTIATION via opacity per scene:
+    BG: lowest opacity  → hazy, furthest from viewer
+    MG: medium opacity  → mid-distance
+    FG: full opacity    → nearest, sharpest
+
+  data-speed on each layer is READ ONLY by Phase 4 GSAP.
+  No transform logic here — purely static positioning in Phase 3.
+  will-change: transform pre-registers these for GPU compositing.
+*/
+.layer {
+  position:       absolute;
+  inset:          0;
+  width:          100%;
+  height:         100%;
+  pointer-events: none;
+  will-change:    transform;
+}
+
+.layer--bg { z-index: 2; }
+.layer--mg { z-index: 3; }
+.layer--fg { z-index: 4; }
+
+.layer svg {
+  position: absolute;
+  bottom:   0;
+  left:     0;
+  width:    100%;
+  height:   100%;
+}
+
+/* Per-scene layer opacities — atmospheric depth illusion */
+.scene--forest   .layer--bg { opacity: 0.48; }
+.scene--forest   .layer--mg { opacity: 0.84; }
+.scene--forest   .layer--fg { opacity: 1.00; }
+
+.scene--foothills .layer--bg { opacity: 0.42; }
+.scene--foothills .layer--mg { opacity: 0.80; }
+.scene--foothills .layer--fg { opacity: 1.00; }
+
+.scene--ascent   .layer--bg { opacity: 0.40; }
+.scene--ascent   .layer--mg { opacity: 0.78; }
+.scene--ascent   .layer--fg { opacity: 1.00; }
+
+/* Cloud section is lighter — all layers at reduced opacity */
+.scene--clouds   .layer--bg { opacity: 0.32; }
+.scene--clouds   .layer--mg { opacity: 0.65; }
+.scene--clouds   .layer--fg { opacity: 0.75; }
+
+/* Snowline: BG peaks must be clearly visible against pale sky */
+.scene--snowline .layer--bg { opacity: 0.55; }
+.scene--snowline .layer--mg { opacity: 0.82; }
+.scene--snowline .layer--fg { opacity: 0.94; }
+
+.scene--summit   .layer--bg { opacity: 0.40; }
+.scene--summit   .layer--mg { opacity: 0.68; }
+.scene--summit   .layer--fg { opacity: 1.00; }
 
 /*
   Content block.
@@ -260,69 +323,85 @@ h1.scene__heading {
   smooth crossfades will be added in Phase 6 (polish).
 */
 
-/* SECTION 1: Forest Base */
+/* SECTION 1: Forest Base
+   Top = lighter sky-green so tree silhouettes contrast against it
+   Bottom = very dark forest floor */
 .scene--forest {
   background: linear-gradient(
-    170deg,
-    #192E11 0%,
-    #243D1B 30%,
-    var(--forest-floor) 60%,
-    #3B5A28 100%
+    to bottom,
+    #608E48 0%,
+    #3E6432 18%,
+    var(--forest-floor) 52%,
+    #1A2E12 100%
   );
 }
 
-/* SECTION 2: Foothills */
+/* SECTION 2: Foothills
+   Top = warm hazy sky (tan/ochre) so grey distant peaks read clearly
+   Bottom = deep earth brown */
 .scene--foothills {
   background: linear-gradient(
-    170deg,
-    #3B5828 0%,
-    #6A5040 40%,
-    var(--earth-stone)  72%,
-    #695948 100%
+    to bottom,
+    #C8B08A 0%,
+    #9C7A5C 25%,
+    var(--earth-stone)  62%,
+    #4E3C2C 100%
   );
 }
 
-/* SECTION 3: Rocky Ascent */
+/* SECTION 3: Rocky Ascent
+   Top = cold grey sky (lighter) so cliff silhouettes have contrast
+   Bottom = very dark slate */
 .scene--ascent {
   background: linear-gradient(
-    170deg,
-    #5A5040 0%,
-    var(--cliff-grey) 50%,
-    #4C4C5A 80%,
-    #3E3E4C 100%
+    to bottom,
+    #9A9AB0 0%,
+    #747482 25%,
+    var(--cliff-grey) 58%,
+    #3C3C4A 100%
   );
 }
 
-/* SECTION 4: Cloud Layer — lighter bg, text uses --on-light */
+/* SECTION 4: Cloud Layer
+   Almost white at top (sourceless diffused light) → medium grey at bottom
+   Text uses --on-light colour */
 .scene--clouds {
   background: linear-gradient(
-    170deg,
-    #6C6C7C 0%,
-    #9A9FAD 28%,
-    #B8BCC6 58%,
-    var(--alpine-mist) 100%
+    to bottom,
+    #F2EFE9 0%,
+    #E2DFDA 18%,
+    var(--alpine-mist) 62%,
+    #9A9FAD 100%
   );
 }
 
-/* SECTION 5: Snowline — cool medium-light bg */
+/* SECTION 5: Snowline
+   Very pale blue-white winter sky at top → deeper blue at bottom
+   Dark void-sky peaks contrast against the pale sky */
 .scene--snowline {
   background: linear-gradient(
-    170deg,
-    var(--alpine-mist)   0%,
-    var(--snowline-blue) 38%,
-    #9AB5CA 72%,
-    #8AAABE 100%
+    to bottom,
+    #ECF2F8 0%,
+    #CCE0F0 22%,
+    var(--snowline-blue) 65%,
+    #7A9CB2 100%
   );
 }
 
-/* SECTION 6: Summit — dark alpine sky, gold payoff */
+/* SECTION 6: Summit
+   Deep pre-dawn sky at top → golden sunrise band in middle
+   → dark alpine atmosphere at bottom (content area)
+   summit-gold gradient = the CSS layer of the sunrise payoff */
 .scene--summit {
   background: linear-gradient(
-    170deg,
-    #0D1824 0%,
-    var(--void-sky) 40%,
-    #243449 78%,
-    #0D1824 100%
+    to bottom,
+    #060E18 0%,
+    var(--void-sky) 22%,
+    #2A3850 38%,
+    var(--summit-gold) 48%,
+    #B06020 55%,
+    var(--void-sky) 72%,
+    #060E18 100%
   );
 }
 
