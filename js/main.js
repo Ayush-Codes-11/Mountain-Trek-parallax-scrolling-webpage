@@ -1,35 +1,16 @@
 /**
  * Mountain Trek — main.js
- * Phase 4: GSAP ScrollTrigger parallax (Section 1) + Lenis smooth scroll
+ * Phase 4 (all 6 sections): Height-ratio parallax + Lenis + GSAP ScrollTrigger
  *
- * DEPENDENCY ORDER (scripts loaded in index.html):
+ * DEPENDENCY ORDER (scripts in index.html):
  *   1. gsap.min.js           — GSAP core
  *   2. ScrollTrigger.min.js  — ScrollTrigger plugin
  *   3. lenis.min.js          — Lenis smooth scroll
  *   4. main.js               — this file
  *
- * ARCHITECTURE:
- *   ┌─────────────────────────────────────────────────────┐
- *   │  User scrolls wheel / trackpad                      │
- *   │           ↓                                         │
- *   │  Lenis intercepts → applies easing → drives         │
- *   │  window scroll position smoothly                    │
- *   │           ↓                                         │
- *   │  lenis.on('scroll', ScrollTrigger.update)           │
- *   │  → ST recalculates trigger positions each frame     │
- *   │           ↓                                         │
- *   │  gsap.ticker drives lenis.raf()                     │
- *   │  → ONE shared RAF loop, no conflicts                │
- *   │           ↓                                         │
- *   │  GSAP tweens yPercent on layers (GPU transform)     │
- *   └─────────────────────────────────────────────────────┘
- *
- * GPU PERFORMANCE NOTE:
- *   All animated properties are transform: translateY (via yPercent).
- *   CSS transforms run on the compositor thread — zero layout thrash.
- *   will-change: transform already applied in Phase 3 CSS.
- *   scrub: true + ease: 'none' = direct linear scroll↔position mapping.
- *   No requestAnimationFrame loops for parallax — GSAP handles RAF.
+ * SCROLL STACK:
+ *   wheel/trackpad → Lenis (eased input) → ScrollTrigger.update → GSAP scrub
+ *   All parallax via transform: translateY (GPU compositor, zero layout cost)
  */
 
 'use strict';
@@ -37,35 +18,39 @@
 
 /* ═══════════════════════════════════════════════════════════════
    0. CONFIG
-   ─────────────────────────────────────────────────────────────
-   LAYER_RANGES defines the yPercent travel for each layer type.
-   These values approximate the speed ratios agreed in Phase 1:
-     BG  speed ≈ 0.15  →  ±20% range  (most lag, most depth illusion)
-     MG  speed ≈ 0.40  →  ±12% range  (medium)
-     FG  speed ≈ 0.85  →  ±5% range   (barely lags, feels nearest)
-
-   The fromTo tween runs from start: 'top bottom' to end: 'bottom top'
-   — the full distance the section travels through the viewport.
-   At the midpoint (section centered in viewport), yPercent = 0 for
-   all layers, so the scene always looks correct when in focus.
 ═══════════════════════════════════════════════════════════════ */
 
-const LAYER_RANGES = {
+/*
+  BASE yPercent ranges — calibrated on Section 1, approved Phase 4.
+  These are the values used when a section is EXACTLY the reference height.
+  The height-ratio formula scales them for sections that differ.
+
+  BG ±20 → speed ≈ 0.15, furthest from viewer (most lag)
+  MG ±12 → speed ≈ 0.40, mid-distance
+  FG ±5  → speed ≈ 0.85, nearest (barely lags)
+*/
+const BASE_RANGES = {
   bg: { from: -20, to:  20 },
   mg: { from: -12, to:  12 },
   fg: { from:  -5, to:   5 },
 };
 
-const ALT_MIN = 1200;   // metres at page top
-const ALT_MAX = 4200;   // metres at page bottom
+// All 6 section IDs in narrative order
+const SECTION_IDS = [
+  'scene-forest',
+  'scene-foothills',
+  'scene-ascent',
+  'scene-clouds',
+  'scene-snowline',
+  'scene-summit',
+];
+
+const ALT_MIN = 1200;
+const ALT_MAX = 4200;
 
 
 /* ═══════════════════════════════════════════════════════════════
    1. REDUCED MOTION
-   ─────────────────────────────────────────────────────────────
-   Read BEFORE any animation initialisation.
-   If true: skip Lenis + GSAP parallax entirely.
-   HUD still updates (useful UX), native scroll is used.
 ═══════════════════════════════════════════════════════════════ */
 
 const REDUCED_MOTION = window.matchMedia(
@@ -77,10 +62,7 @@ document.body.dataset.reducedMotion = REDUCED_MOTION ? 'true' : 'false';
 
 /* ═══════════════════════════════════════════════════════════════
    2. GSAP PLUGIN REGISTRATION
-   ─────────────────────────────────────────────────────────────
-   Must be called before any ScrollTrigger usage.
-   Placed after the reduced-motion check to avoid registering
-   if we're going to bail on all animation anyway.
+   Must precede any ScrollTrigger usage.
 ═══════════════════════════════════════════════════════════════ */
 
 gsap.registerPlugin(ScrollTrigger);
@@ -88,33 +70,16 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ═══════════════════════════════════════════════════════════════
    3. LENIS SMOOTH SCROLL
-   ─────────────────────────────────────────────────────────────
-   COORDINATION WITH SCROLLTRIGGER — the critical bit:
 
-   Problem: Lenis replaces native scroll with its own eased scroll.
-   ScrollTrigger reads scroll position from the window.
-   Without sync, they can drift: ST calculates trigger positions
-   based on raw scroll, but Lenis's scroll is delayed/eased.
-
-   Fix 1: lenis.on('scroll', ScrollTrigger.update)
-     → On every Lenis scroll frame, tell ST to recalculate all
-       trigger positions using Lenis's current (smooth) position.
-       ST then scrubs tweens based on this position.
-
-   Fix 2: gsap.ticker.add((time) => lenis.raf(time * 1000))
-     → GSAP's internal ticker drives Lenis's requestAnimationFrame.
-       Both systems share ONE RAF loop. No two independent loops
-       competing for the same scroll position.
-
-   Fix 3: gsap.ticker.lagSmoothing(0)
-     → By default GSAP compresses elapsed time when a browser tab
-       is backgrounded and re-focused. This would make Lenis
-       "catch up" with a single fast jump. Disabling ensures
-       returning to the tab doesn't cause a scroll jank burst.
-
-   RESULT: Smooth, eased scroll position feeds directly and
-   synchronously into GSAP parallax tweens. Fast trackpad flicks
-   = smooth parallax without jank, because Lenis eases the INPUT.
+   Coordination strategy with ScrollTrigger:
+   • lenis.on('scroll', ScrollTrigger.update)
+       → every Lenis frame tells ST to recalculate trigger positions
+         using Lenis's current (smoothed) scroll position
+   • gsap.ticker drives lenis.raf()
+       → one shared RAF loop; Lenis and GSAP never fight
+   • gsap.ticker.lagSmoothing(0)
+       → prevents GSAP from time-compressing on tab-switch,
+         which would make Lenis "catch up" with a jank burst
 ═══════════════════════════════════════════════════════════════ */
 
 let lenis;
@@ -132,123 +97,149 @@ function initLenis() {
     infinite:           false,
   });
 
-  // Fix 1: every Lenis update feeds into ScrollTrigger
   lenis.on('scroll', ScrollTrigger.update);
 
-  // Fix 2: GSAP ticker drives Lenis (shared RAF)
   gsap.ticker.add((time) => {
     lenis.raf(time * 1000);
   });
 
-  // Fix 3: prevent lag-smoothing jank on tab-switch
   gsap.ticker.lagSmoothing(0);
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   4. PARALLAX UTILITY FUNCTION
+   4. HEIGHT-RATIO PARALLAX FORMULA
    ─────────────────────────────────────────────────────────────
-   Creates one scrubbed fromTo tween for a single layer element.
 
-   trigger: the section element — ST uses its bounds to set
-            start/end scroll positions.
-   start: 'top bottom'  — tween begins as section-top enters viewport
-   end:   'bottom top'  — tween ends as section-bottom leaves viewport
-   scrub: true          — yPercent is a DIRECT function of scroll
-                          position, not duration. No async delay.
-   ease: 'none'         — linear mapping. Lenis handles the easing
-                          on the input side; the tween itself is linear.
-   invalidateOnRefresh  — recalculate trigger positions on resize.
+   PROBLEM BEING SOLVED:
+   Fixed yPercent values (±20/±12/±5) produce a consistent APPARENT
+   SPEED only when all sections are exactly the same height. If any
+   section renders taller or shorter (due to text wrapping, font
+   scaling, accessibility text-size, responsive breakpoints), that
+   section's layers move at a different rate per pixel scrolled.
 
-   GPU check: yPercent → transform: translateY(x%)
-   Compositor-thread only. No layout, no paint.
+   THE FORMULA (applied at runtime, recalculated on resize):
+
+     refHeight  = Section 1's getBoundingClientRect().height
+                  (the already-approved reference)
+
+     thisHeight = this section's getBoundingClientRect().height
+
+     ratio      = thisHeight / refHeight
+
+     BG range   = BASE ±20  ×  ratio
+     MG range   = BASE ±12  ×  ratio
+     FG range   = BASE ±5   ×  ratio
+
+   WHY IT WORKS:
+   yPercent is a % of the ELEMENT's height. Since .layer fills 100%
+   of its section, 1% yPercent = 1% of section height in absolute px.
+
+     Layer movement (px) = range × sectionHeight / 100
+                         = (base × ratio) × sectionHeight / 100
+                         = base × (thisHeight / refHeight) × thisHeight / 100
+
+     Scroll distance     = sectionHeight + viewportHeight
+
+     Apparent speed      ≈ base × thisHeight / refHeight / (thisHeight + vH)
+
+   When sections are close in height (all min-height: 200vh, so
+   heights differ only by content overflow), thisHeight ≈ refHeight,
+   ratio ≈ 1.0, and apparent speed is virtually identical.
+   The formula gracefully absorbs small differences without requiring
+   every section to be exactly the same pixel height forever.
+
+   SECTION 1 UNCHANGED:
+   ratio = refHeight / refHeight = 1.0 → ranges = ±20/±12/±5 exactly.
+   Section 1 feels identical to the Phase 4 approved version.
+
+   RESIZE HANDLING:
+   Heights are re-measured after every resize (debounced 200ms).
+   All parallax ScrollTriggers are killed and recreated with fresh
+   ratio values. ScrollTrigger.refresh() repositions all triggers.
 ═══════════════════════════════════════════════════════════════ */
 
-function parallaxLayer(el, from, to, trigger) {
-  if (!el) return;
+// Module-level registry of active parallax ScrollTriggers.
+// Killed and repopulated on resize.
+const parallaxTriggers = [];
 
-  gsap.fromTo(
-    el,
-    { yPercent: from },
-    {
-      yPercent: to,
-      ease: 'none',
-      scrollTrigger: {
-        trigger,
-        start:              'top bottom',
-        end:                'bottom top',
-        scrub:              true,
-        invalidateOnRefresh: true,
-      },
-    }
-  );
+/**
+ * Build the three-layer parallax tweens for one section.
+ * @param {HTMLElement} section  — the section element
+ * @param {number}      refHeight — Section 1's measured height in px
+ */
+function buildSectionParallax(section, refHeight) {
+  const thisHeight = section.getBoundingClientRect().height;
+  const ratio = refHeight > 0 ? thisHeight / refHeight : 1;
+
+  const layerDefs = [
+    { selector: '.layer--bg', base: BASE_RANGES.bg },
+    { selector: '.layer--mg', base: BASE_RANGES.mg },
+    { selector: '.layer--fg', base: BASE_RANGES.fg },
+  ];
+
+  layerDefs.forEach(({ selector, base }) => {
+    const el = section.querySelector(selector);
+    if (!el) return;
+
+    const scaledFrom = base.from * ratio;
+    const scaledTo   = base.to   * ratio;
+
+    const tween = gsap.fromTo(
+      el,
+      { yPercent: scaledFrom },
+      {
+        yPercent: scaledTo,
+        ease: 'none',              // linear: Lenis handles input easing
+        scrollTrigger: {
+          trigger:             section,
+          start:               'top bottom', // enters viewport bottom
+          end:                 'bottom top', // exits viewport top
+          scrub:               true,         // direct position↔scroll mapping
+          invalidateOnRefresh: true,         // recalc on ST's own refresh
+        },
+      }
+    );
+
+    // Register for cleanup on resize
+    if (tween.scrollTrigger) parallaxTriggers.push(tween.scrollTrigger);
+  });
+}
+
+/**
+ * Kill all existing parallax triggers, remeasure every section,
+ * and rebuild with fresh ratio values.
+ * Called on: initial load + every debounced resize.
+ */
+function initAllParallax() {
+  // 1. Destroy previous ScrollTrigger instances
+  parallaxTriggers.forEach(st => st.kill());
+  parallaxTriggers.length = 0;
+
+  // 2. Measure reference section (Section 1 = approved baseline)
+  const refSection = document.getElementById(SECTION_IDS[0]);
+  if (!refSection) return;
+  const refHeight = refSection.getBoundingClientRect().height;
+
+  // 3. Build parallax for all 6 sections
+  SECTION_IDS.forEach(id => {
+    const section = document.getElementById(id);
+    if (section) buildSectionParallax(section, refHeight);
+  });
+
+  // 4. Recalculate all ST trigger positions (including color bleeds)
+  ScrollTrigger.refresh();
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   5. SECTION 1 — FOREST BASE — PARALLAX
+   5. COLOR BLEEDS — section-boundary crossfades
    ─────────────────────────────────────────────────────────────
-   Phase 4, Section 1 only.
-   Awaiting user approval before replicating to Sections 2-6.
-
-   Three layers, three different yPercent ranges:
-     BG (±20): large range → lots of movement relative to section
-               → appears to lag far behind → reads as DISTANT
-     MG (±12): medium range → moderate lag → mid-distance
-     FG (±5):  small range → barely lags → reads as NEAR
-
-   At rest (section centered in viewport), all layers at yPercent 0
-   — this ensures the scene composition is correct when in focus.
-   CSS overflow: hidden on the section clips any edge bleeding.
-═══════════════════════════════════════════════════════════════ */
-
-function initSection1Parallax() {
-  const section = document.getElementById('scene-forest');
-  if (!section) return;
-
-  parallaxLayer(
-    section.querySelector('.layer--bg'),
-    LAYER_RANGES.bg.from, LAYER_RANGES.bg.to,
-    section
-  );
-
-  parallaxLayer(
-    section.querySelector('.layer--mg'),
-    LAYER_RANGES.mg.from, LAYER_RANGES.mg.to,
-    section
-  );
-
-  parallaxLayer(
-    section.querySelector('.layer--fg'),
-    LAYER_RANGES.fg.from, LAYER_RANGES.fg.to,
-    section
-  );
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   6. COLOR BLEEDS — Section boundary crossfades
-   ─────────────────────────────────────────────────────────────
-   Each .scene__bleed div sits at the bottom of its section and
-   contains a gradient pointing toward the next section's top color.
-
-   GSAP scrubs its opacity 0 → 1 as the NEXT section enters the
-   viewport, creating a smooth color handoff at the boundary.
-
-   Section 1 → 2 implemented here (Phase 4, Section 1 only).
-   Sections 2-5 bleeds activated in Phase 4.2 after approval.
-
-   Trigger explanation:
-     trigger: '#scene-foothills'   — watch Section 2
-     start: 'top 80%'              — bleed starts when S2 is 80%
-                                     down from viewport top
-     end: 'top top'                — fully opaque when S2's top
-                                     reaches viewport top
-     scrub: true                   — opacity directly follows scroll
+   Section 1→2 active. Sections 2-5 bleeds require .scene__bleed
+   divs to be added to HTML first (Phase 4.2 / Phase 6 polish).
 ═══════════════════════════════════════════════════════════════ */
 
 function initColorBleeds() {
-  // ── Section 1 → Section 2 ──
   const bleed1 = document.querySelector('#scene-forest .scene__bleed');
   if (bleed1) {
     gsap.fromTo(bleed1,
@@ -257,96 +248,20 @@ function initColorBleeds() {
         opacity: 1,
         ease: 'none',
         scrollTrigger: {
-          trigger:            '#scene-foothills',
-          start:              'top 60%',   // recalibrated for 200vh sections
-          end:                'top top',
-          scrub:              true,
+          trigger:             '#scene-foothills',
+          start:               'top 60%',
+          end:                 'top top',
+          scrub:               true,
           invalidateOnRefresh: true,
         },
       }
     );
   }
-
-  // ── Sections 2-5 bleeds (Phase 4.2 — after Section 1 approval) ──
-  // Uncomment each block and add .scene__bleed divs to HTML:
-
-  // const bleed2 = document.querySelector('#scene-foothills .scene__bleed');
-  // if (bleed2) { gsap.fromTo(bleed2, { opacity: 0 }, { opacity: 1, ease: 'none',
-  //   scrollTrigger: { trigger: '#scene-ascent', start: 'top 80%',
-  //   end: 'top top', scrub: true, invalidateOnRefresh: true }}) }
-
-  // const bleed3 = document.querySelector('#scene-ascent .scene__bleed');
-  // if (bleed3) { gsap.fromTo(bleed3, { opacity: 0 }, { opacity: 1, ease: 'none',
-  //   scrollTrigger: { trigger: '#scene-clouds', start: 'top 80%',
-  //   end: 'top top', scrub: true, invalidateOnRefresh: true }}) }
-
-  // const bleed4 = document.querySelector('#scene-clouds .scene__bleed');
-  // if (bleed4) { gsap.fromTo(bleed4, { opacity: 0 }, { opacity: 1, ease: 'none',
-  //   scrollTrigger: { trigger: '#scene-snowline', start: 'top 80%',
-  //   end: 'top top', scrub: true, invalidateOnRefresh: true }}) }
-
-  // const bleed5 = document.querySelector('#scene-snowline .scene__bleed');
-  // if (bleed5) { gsap.fromTo(bleed5, { opacity: 0 }, { opacity: 1, ease: 'none',
-  //   scrollTrigger: { trigger: '#scene-summit', start: 'top 80%',
-  //   end: 'top top', scrub: true, invalidateOnRefresh: true }}) }
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   7. SECTIONS 2-6 — PARALLAX SCAFFOLD (Phase 4.2)
-   ─────────────────────────────────────────────────────────────
-   Exact same pattern as initSection1Parallax().
-   Activate each function call in init() after user approval.
-═══════════════════════════════════════════════════════════════ */
-
-function initSection2Parallax() {
-  const section = document.getElementById('scene-foothills');
-  if (!section) return;
-  parallaxLayer(section.querySelector('.layer--bg'), LAYER_RANGES.bg.from, LAYER_RANGES.bg.to, section);
-  parallaxLayer(section.querySelector('.layer--mg'), LAYER_RANGES.mg.from, LAYER_RANGES.mg.to, section);
-  parallaxLayer(section.querySelector('.layer--fg'), LAYER_RANGES.fg.from, LAYER_RANGES.fg.to, section);
-}
-
-function initSection3Parallax() {
-  const section = document.getElementById('scene-ascent');
-  if (!section) return;
-  parallaxLayer(section.querySelector('.layer--bg'), LAYER_RANGES.bg.from, LAYER_RANGES.bg.to, section);
-  parallaxLayer(section.querySelector('.layer--mg'), LAYER_RANGES.mg.from, LAYER_RANGES.mg.to, section);
-  parallaxLayer(section.querySelector('.layer--fg'), LAYER_RANGES.fg.from, LAYER_RANGES.fg.to, section);
-}
-
-function initSection4Parallax() {
-  const section = document.getElementById('scene-clouds');
-  if (!section) return;
-  parallaxLayer(section.querySelector('.layer--bg'), LAYER_RANGES.bg.from, LAYER_RANGES.bg.to, section);
-  parallaxLayer(section.querySelector('.layer--mg'), LAYER_RANGES.mg.from, LAYER_RANGES.mg.to, section);
-  parallaxLayer(section.querySelector('.layer--fg'), LAYER_RANGES.fg.from, LAYER_RANGES.fg.to, section);
-}
-
-function initSection5Parallax() {
-  const section = document.getElementById('scene-snowline');
-  if (!section) return;
-  parallaxLayer(section.querySelector('.layer--bg'), LAYER_RANGES.bg.from, LAYER_RANGES.bg.to, section);
-  parallaxLayer(section.querySelector('.layer--mg'), LAYER_RANGES.mg.from, LAYER_RANGES.mg.to, section);
-  parallaxLayer(section.querySelector('.layer--fg'), LAYER_RANGES.fg.from, LAYER_RANGES.fg.to, section);
-}
-
-function initSection6Parallax() {
-  const section = document.getElementById('scene-summit');
-  if (!section) return;
-  parallaxLayer(section.querySelector('.layer--bg'), LAYER_RANGES.bg.from, LAYER_RANGES.bg.to, section);
-  parallaxLayer(section.querySelector('.layer--mg'), LAYER_RANGES.mg.from, LAYER_RANGES.mg.to, section);
-  parallaxLayer(section.querySelector('.layer--fg'), LAYER_RANGES.fg.from, LAYER_RANGES.fg.to, section);
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   8. ALTITUDE HUD + SCROLL PROGRESS BAR
-   ─────────────────────────────────────────────────────────────
-   Carried over from Phase 2, unchanged.
-   RAF-throttled scroll listener.
-   HUD reads window.scrollY (Lenis still updates window.scrollY
-   so this continues to work correctly).
+   6. ALTITUDE HUD + SCROLL PROGRESS BAR
 ═══════════════════════════════════════════════════════════════ */
 
 const elAltValue  = document.getElementById('js-altitude-value');
@@ -355,14 +270,13 @@ const elHudMarker = document.getElementById('js-hud-marker');
 const elAltHud    = document.getElementById('altitude-hud');
 const elProgress  = document.getElementById('js-progress-fill');
 
-function lerp(a, b, t) { return a + (b - a) * t; }
+function lerp(a, b, t)    { return a + (b - a) * t; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-function fmtAlt(n) { return Math.round(n).toLocaleString('en-US'); }
+function fmtAlt(n)        { return Math.round(n).toLocaleString('en-US'); }
 
 function getPageProgress() {
-  const scrollY = window.scrollY || document.documentElement.scrollTop;
-  const maxScroll =
-    document.documentElement.scrollHeight - window.innerHeight;
+  const scrollY   = window.scrollY || document.documentElement.scrollTop;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
   return maxScroll > 0 ? clamp(scrollY / maxScroll, 0, 1) : 0;
 }
 
@@ -371,8 +285,8 @@ function refreshHUD() {
   const alt = lerp(ALT_MIN, ALT_MAX, p);
   const pct = (p * 100).toFixed(2);
 
-  if (elAltValue)  elAltValue.textContent = fmtAlt(alt);
-  if (elHudFill)   elHudFill.style.height  = `${pct}%`;
+  if (elAltValue)  elAltValue.textContent   = fmtAlt(alt);
+  if (elHudFill)   elHudFill.style.height   = `${pct}%`;
   if (elHudMarker) elHudMarker.style.bottom = `${pct}%`;
 
   const pb = elAltHud?.querySelector('[role="progressbar"]');
@@ -385,47 +299,52 @@ let hudRafPending = false;
 function onScroll() {
   if (hudRafPending) return;
   hudRafPending = true;
-  requestAnimationFrame(() => {
-    refreshHUD();
-    hudRafPending = false;
-  });
+  requestAnimationFrame(() => { refreshHUD(); hudRafPending = false; });
 }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   9. INIT
+   7. RESIZE HANDLER
+   ─────────────────────────────────────────────────────────────
+   Debounced 200ms — avoids thrashing during continuous resize drag.
+   Kills + recreates all parallax with freshly measured heights.
+   initAllParallax() already calls ScrollTrigger.refresh() internally.
+═══════════════════════════════════════════════════════════════ */
+
+let resizeTimeout;
+function onResize() {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    initAllParallax(); // remeasures, rebuilds, refreshes
+    refreshHUD();
+  }, 200);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   8. INIT
 ═══════════════════════════════════════════════════════════════ */
 
 function init() {
-  // ── Step 1: Smooth scroll (Lenis) — must run before any ST tweens
+  // Step 1: smooth scroll (must precede all ST tweens)
   initLenis();
 
   if (!REDUCED_MOTION) {
+    // Step 2: all 6 sections — height-ratio formula
+    initAllParallax();
 
-    // ── Step 2: Section 1 parallax (Phase 4 — approved scope)
-    initSection1Parallax();
-
-    // ── Step 3: Color bleed at Section 1→2 boundary
+    // Step 3: section boundary color bleeds
     initColorBleeds();
-
-    // ── Phase 4.2: Activate after Section 1 approval ──────────
-    // initSection2Parallax();
-    // initSection3Parallax();
-    // initSection4Parallax();
-    // initSection5Parallax();
-    // initSection6Parallax();
-    // ──────────────────────────────────────────────────────────
-
-    // Phase 5: initHikerSilhouette() — goes here
   }
 
-  // ── Step 4: HUD (runs regardless of reduced-motion)
+  // Step 4: HUD (always runs, motion-agnostic)
   refreshHUD();
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll, { passive: true });
+  window.addEventListener('resize', onResize, { passive: true });
+
+  // Phase 5: initHikerSilhouette() goes here
 }
 
-// Robust DOM-ready handling
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
