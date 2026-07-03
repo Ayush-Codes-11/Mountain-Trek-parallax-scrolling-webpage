@@ -585,23 +585,41 @@ h1.scene__heading {
   transition:      height 0.12s var(--ease-climb);
 }
 
-/* Marker dot — climbs the track with scroll */
+/* Marker — climbs the track with scroll.
+   transform: the hiker's FEET (bottom of SVG) must sit on the
+   track position, not the hiker's center. So we translate -100%
+   on Y (up by full hiker height) and -50% on X (center on track). */
 .altitude-hud__marker {
   position:   absolute;
   bottom:     0%;   /* updated via JS — 0% = base, 100% = summit */
   left:       50%;
-  transform:  translate(-50%, 50%);
+  transform:  translateX(-50%) translateY(0);
   will-change: bottom;
   transition: bottom 0.12s var(--ease-climb);
 }
 
-/* Phase 5: replace this with SVG hiker silhouette */
-.altitude-hud__dot {
-  width:         8px;
-  height:        8px;
-  background:    var(--summit-gold);
-  border:        1.5px solid rgba(240, 237, 230, 0.80);
-  border-radius: 50%;
+/* ── Phase 5: Hiker silhouette ─────────────────────────────────
+   Replaces .altitude-hud__dot.
+   color: --summit-gold → SVG fill="currentColor" picks this up.
+   Subtle walk-bob animation gives the hiker life as it climbs.
+   Animation paused for prefers-reduced-motion users.
+── */
+.altitude-hud__hiker {
+  display:     block;
+  width:       18px;
+  height:      27px;
+  color:       var(--summit-gold);
+  filter:      drop-shadow(0 1px 3px rgba(0,0,0,0.45));
+  animation:   hiker-walk 0.85s ease-in-out infinite alternate;
+}
+
+@keyframes hiker-walk {
+  0%   { transform: rotate(-2deg) translateY(0px);   }
+  100% { transform: rotate( 2deg) translateY(-1px);  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .altitude-hud__hiker { animation: none; }
 }
 
 /* Altitude value display — DM Mono, tabular numerals */

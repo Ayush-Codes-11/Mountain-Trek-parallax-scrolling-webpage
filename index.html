@@ -39,7 +39,31 @@
          aria-label="Altitude progress">
       <div class="altitude-hud__fill"   id="js-hud-fill"   aria-hidden="true"></div>
       <div class="altitude-hud__marker" id="js-hud-marker" aria-hidden="true">
-        <div class="altitude-hud__dot"></div>
+        <!--
+          Phase 5: Hiker silhouette — replaces the plain dot.
+          Side-profile, backpack, walking pole.
+          Flat geometric shapes — same visual vocabulary as the section SVGs.
+          fill="currentColor" → inherits CSS color (var(--summit-gold)).
+          Positioned so feet sit on the track line (transform on parent).
+        -->
+        <svg class="altitude-hud__hiker"
+             viewBox="0 0 20 30"
+             xmlns="http://www.w3.org/2000/svg"
+             fill="currentColor">
+          <!-- Head -->
+          <circle cx="13" cy="4"  r="3.2"/>
+          <!-- Backpack (behind torso, slightly wider left) -->
+          <rect   x="5"  y="8"  width="5"   height="8"  rx="1"/>
+          <!-- Torso -->
+          <rect   x="9"  y="8"  width="4.5" height="8.5"/>
+          <!-- Left leg — trailing, angled back -->
+          <polygon points="9.5,16.5 13,16.5 11,28 8,28"/>
+          <!-- Right leg — leading, angled forward -->
+          <polygon points="11,16.5 14,16.5 15,28 12,28"/>
+          <!-- Walking pole — thin rect, angled away from body -->
+          <rect   x="17.5" y="11" width="1.6" height="17" rx="0.8"
+                  transform="rotate(12 18.3 19.5)"/>
+        </svg>
       </div>
     </div>
     <div class="altitude-hud__readout" aria-live="polite" aria-atomic="true">
