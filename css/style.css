@@ -153,13 +153,12 @@ body {
 
 .scene {
   position:   relative;
-  min-height: 200vh;        /* Phase 4 fix: 200vh = consistent scroll investment
-                               across all sections. At 100vh, a single Lenis
-                               gesture covered an entire section (Sections 2-5
-                               appeared to "fly past" vs Section 1/6 which were
-                               taller due to larger heading + summit stats).
-                               200vh also gives SVG layers real vertical travel
-                               room for the parallax offset (±20% BG range). */
+  min-height: 150vh;        /* 150vh = 100vh sticky text panel + 50vh of
+                               "world moves past" scroll after text exits.
+                               Reduced from 200vh: the 100vh dead zone below
+                               text felt like a full empty screen. 50vh keeps
+                               enough parallax travel without the dead air.
+                               Height-ratio formula auto-adjusts layer ranges. */
 
   /* overflow: hidden REMOVED — it breaks position: sticky on .scene__content.
      SVG layer overflow is now clipped by overflow: hidden on .scene__layers. */
