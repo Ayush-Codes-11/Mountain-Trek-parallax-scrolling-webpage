@@ -153,12 +153,11 @@ body {
 
 .scene {
   position:   relative;
-  min-height: 150vh;        /* 150vh = 100vh sticky text panel + 50vh of
-                               "world moves past" scroll after text exits.
-                               Reduced from 200vh: the 100vh dead zone below
-                               text felt like a full empty screen. 50vh keeps
-                               enough parallax travel without the dead air.
-                               Height-ratio formula auto-adjusts layer ranges. */
+  min-height: 110vh;        /* 100vh sticky text panel + 10vh parallax
+                               transition buffer. The dead-scroll zone below
+                               text is now ~10vh — matching the bottom padding
+                               (~8vh) visible above the text block, per design
+                               feedback. Height-ratio formula adjusts ranges. */
 
   /* overflow: hidden REMOVED — it breaks position: sticky on .scene__content.
      SVG layer overflow is now clipped by overflow: hidden on .scene__layers. */
