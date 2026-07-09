@@ -1,41 +1,53 @@
 /* ═══════════════════════════════════════════════════════════════
-   JOURNEY TO THE SUMMIT — Premium CSS
-   Award-winning parallax landing page
+   JOURNEY TO THE SUMMIT — Optimized CSS
+   • Progress bar uses transform:scaleX (compositor, no layout thrash)
+   • Scene reveal uses opacity-only (no transform conflict with JS)
+   • contain:layout on scenes isolates repaints
+   • Proper 3-breakpoint mobile stack (480 / 640 / 768)
+   • Touch targets ≥ 44px, full-width CTA on small screens
+   • Reduced-motion: all keyframe + transition animations suppressed
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── 0. Design tokens ────────────────────────────────────────── */
 :root {
-  --bg:            #06090c;
-  --text:          #f0ece4;
-  --text-muted:    rgba(240,236,228,0.62);
-  --accent:        #f2b24e;
-  --accent-dim:    rgba(242,178,78,0.18);
-  --panel-dark:    rgba(6, 10, 15, 0.72);
-  --panel-light:   rgba(248, 244, 236, 0.88);
-  --border-dark:   rgba(255,255,255,0.10);
-  --border-light:  rgba(0,0,0,0.12);
-  --radius-card:   1.25rem;
-  --font-display:  'Fraunces', Georgia, serif;
-  --font-body:     'Inter', 'Segoe UI', sans-serif;
-  --font-mono:     'DM Mono', monospace;
-  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
-  --hud-height:    160px;
+  --bg:           #06090c;
+  --text:         #f0ece4;
+  --text-muted:   rgba(240,236,228,0.62);
+  --accent:       #f2b24e;
+  --panel-dark:   rgba(6,10,15,0.72);
+  --panel-light:  rgba(248,244,236,0.88);
+  --border-dark:  rgba(255,255,255,0.10);
+  --border-light: rgba(0,0,0,0.12);
+  --radius-card:  1.25rem;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter','Segoe UI',sans-serif;
+  --font-mono:    'DM Mono',monospace;
+  --ease-out:     cubic-bezier(0.16,1,0.3,1);
+  --hud-height:   160px;
 }
 
 /* ── 1. Reset ────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
+  /* Prevent elastic overscroll interfering with parallax on iOS */
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-a { color: inherit; text-decoration: none; }
-img, svg { display: block; max-width: 100%; }
+a { color:inherit; text-decoration:none; }
+img,svg { display:block; max-width:100%; }
 
 /* ── 2. Scroll progress bar ──────────────────────────────────── */
+/*
+  KEY PERF WIN: width → transform:scaleX
+  scaleX runs on the GPU compositor thread — zero layout/paint cost.
+  The element stays full-width; scaleX clips it visually.
+*/
 .progress-bar {
   position: fixed;
   inset: 0 0 auto 0;
@@ -46,19 +58,20 @@ img, svg { display: block; max-width: 100%; }
 .progress-bar span {
   display: block;
   height: 100%;
-  width: 0%;
+  width: 100%;                  /* always full-width */
+  transform: scaleX(0);         /* JS drives this via scaleX(progress) */
+  transform-origin: left center;
   background: linear-gradient(90deg, #f2b24e, #ffd980, #f2b24e);
-  background-size: 200% 100%;
+  background-size: 300% 100%;
   animation: shimmer-bar 2.4s linear infinite;
-  transform-origin: left;
-  transition: width 0.08s linear;
+  will-change: transform;       /* promote to compositor layer */
 }
 @keyframes shimmer-bar {
   0%   { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
 
-/* ── 3. Cursor glow (desktop only) ──────────────────────────── */
+/* ── 3. Cursor glow (desktop / pointer device only) ─────────── */
 .cursor-glow {
   position: fixed;
   width: 340px;
@@ -67,11 +80,11 @@ img, svg { display: block; max-width: 100%; }
   background: radial-gradient(circle, rgba(242,178,78,0.12), transparent 70%);
   pointer-events: none;
   z-index: 1;
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s;
+  transform: translate(-50%,-50%);
   opacity: 0;
+  will-change: left, top;
 }
-@media (hover: hover) { .cursor-glow { opacity: 1; } }
+@media (hover:hover) { .cursor-glow { opacity:1; } }
 
 /* ── 4. Nav dots ─────────────────────────────────────────────── */
 .nav-dots {
@@ -94,6 +107,9 @@ img, svg { display: block; max-width: 100%; }
   border: 1.5px solid rgba(255,255,255,0.22);
   transition: background 0.25s, transform 0.25s, border-color 0.25s;
   position: relative;
+  /* Larger hit area without changing visual size */
+  padding: 6px;
+  margin: -6px;
 }
 .nav-dot::after {
   content: attr(data-label);
@@ -110,14 +126,13 @@ img, svg { display: block; max-width: 100%; }
   pointer-events: none;
   transition: opacity 0.2s;
 }
-.nav-dot:hover::after { opacity: 0.7; }
+.nav-dot:hover::after { opacity:0.7; }
 .nav-dot:hover,
 .nav-dot.is-active {
   background: var(--accent);
   border-color: var(--accent);
   transform: scale(1.5);
 }
-@media (max-width: 760px) { .nav-dots { display: none; } }
 
 /* ── 5. Altitude HUD ─────────────────────────────────────────── */
 .alt-hud {
@@ -150,19 +165,19 @@ img, svg { display: block; max-width: 100%; }
 }
 .alt-hud__fill {
   position: absolute;
-  bottom: 0; left: 0;
+  bottom:0; left:0;
   width: 100%;
   height: 0%;
   background: linear-gradient(to top, var(--accent), rgba(242,178,78,0.3));
   border-radius: 1px;
-  transition: height 0.1s linear;
+  will-change: height;
 }
 .alt-hud__marker {
   position: absolute;
   bottom: 0%;
   left: 50%;
   transform: translateX(-50%);
-  transition: bottom 0.1s linear;
+  will-change: bottom;
 }
 .alt-hud__hiker {
   display: block;
@@ -176,7 +191,6 @@ img, svg { display: block; max-width: 100%; }
   0%   { transform: rotate(-2deg); }
   100% { transform: rotate(2deg) translateY(-1px); }
 }
-@media (prefers-reduced-motion: reduce) { .alt-hud__hiker { animation: none; } }
 .alt-hud__readout {
   font-family: var(--font-mono);
   font-size: 0.65rem;
@@ -190,20 +204,19 @@ img, svg { display: block; max-width: 100%; }
   font-size: 0.5rem;
   opacity: 0.6;
 }
-@media (max-width: 760px) { .alt-hud { display: none; } }
 
 /* ── 6. HERO ─────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;  /* svh = small viewport height — correct on mobile browsers */
   display: grid;
   place-items: center;
-  padding: 2rem;
+  padding: clamp(1rem,4vw,2rem);
   overflow: hidden;
   background:
     radial-gradient(ellipse at 80% 20%, rgba(242,178,78,0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 20% 80%, rgba(60,110,180,0.12) 0%, transparent 50%),
-    linear-gradient(160deg, #0c1620 0%, #0d1a24 40%, #070c10 100%);
+    linear-gradient(160deg,#0c1620 0%,#0d1a24 40%,#070c10 100%);
 }
 .hero__stars {
   position: absolute;
@@ -216,18 +229,19 @@ img, svg { display: block; max-width: 100%; }
   z-index: 2;
   max-width: 46rem;
   text-align: center;
+  padding: 0 1rem;
 }
 .eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: clamp(0.6rem,1.5vw,0.72rem);
   font-weight: 500;
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 1.6rem;
+  margin-bottom: clamp(1rem,3vh,1.6rem);
   opacity: 0;
   animation: fade-up 0.8s var(--ease-out) 0.2s forwards;
 }
@@ -237,14 +251,16 @@ img, svg { display: block; max-width: 100%; }
   height: 1px;
   background: var(--accent);
   opacity: 0.6;
+  flex-shrink: 0;
 }
 .hero__title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(3.8rem, 9vw, 8rem);
+  /* clamp: min 2.4rem (small phone) → 9vw → max 8rem */
+  font-size: clamp(2.4rem,9vw,8rem);
   line-height: 0.92;
   letter-spacing: -0.02em;
-  margin-bottom: 1.6rem;
+  margin-bottom: clamp(1rem,3vh,1.6rem);
   display: flex;
   flex-direction: column;
   gap: 0.04em;
@@ -253,10 +269,11 @@ img, svg { display: block; max-width: 100%; }
   display: block;
   opacity: 0;
   transform: translateY(40px);
+  will-change: opacity, transform;
 }
-.hero__title-line:nth-child(1) { animation: fade-up 0.9s var(--ease-out) 0.4s forwards; }
+.hero__title-line:nth-child(1) { animation: fade-up 0.9s var(--ease-out) 0.4s  forwards; }
 .hero__title-line:nth-child(2) { animation: fade-up 0.9s var(--ease-out) 0.55s forwards; }
-.hero__title-line:nth-child(3) { animation: fade-up 0.9s var(--ease-out) 0.7s forwards; }
+.hero__title-line:nth-child(3) { animation: fade-up 0.9s var(--ease-out) 0.7s  forwards; }
 .hero__title-line--accent {
   color: var(--accent);
   font-style: italic;
@@ -264,20 +281,20 @@ img, svg { display: block; max-width: 100%; }
   font-weight: 300;
 }
 @keyframes fade-up {
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity:1; transform:translateY(0); }
 }
 .hero__lead {
-  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  font-size: clamp(0.92rem,1.8vw,1.12rem);
   line-height: 1.8;
   color: var(--text-muted);
   max-width: 36rem;
-  margin: 0 auto 2rem;
+  margin: 0 auto clamp(1.4rem,4vh,2rem);
   opacity: 0;
   animation: fade-up 0.9s var(--ease-out) 0.85s forwards;
 }
 .hero__actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.85rem;
   justify-content: center;
   flex-wrap: wrap;
   opacity: 0;
@@ -286,8 +303,10 @@ img, svg { display: block; max-width: 100%; }
 .hero__cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.7rem;
+  padding: 0 1.7rem;
+  height: 52px;            /* explicit height = reliable touch target */
   border-radius: 999px;
   background: var(--accent);
   color: #1a0d00;
@@ -295,16 +314,18 @@ img, svg { display: block; max-width: 100%; }
   font-size: 0.95rem;
   letter-spacing: 0.02em;
   transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
-  box-shadow: 0 0 0 0 rgba(242,178,78,0.4);
 }
 .hero__cta:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(242,178,78,0.35);
 }
+.hero__cta:active { transform: translateY(0); }
 .hero__ghost {
   display: inline-flex;
   align-items: center;
-  padding: 0.85rem 1.7rem;
+  justify-content: center;
+  padding: 0 1.7rem;
+  height: 52px;
   border-radius: 999px;
   border: 1px solid var(--border-dark);
   font-size: 0.95rem;
@@ -315,10 +336,12 @@ img, svg { display: block; max-width: 100%; }
   border-color: rgba(255,255,255,0.3);
   color: var(--text);
 }
+/* Ambient glows */
 .hero__glow {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  will-change: transform;
 }
 .hero__glow--amber {
   width: 500px; height: 500px;
@@ -335,12 +358,13 @@ img, svg { display: block; max-width: 100%; }
   animation: glow-drift 10s ease-in-out infinite alternate-reverse;
 }
 @keyframes glow-drift {
-  0%   { transform: translate(0, 0); }
-  100% { transform: translate(30px, 20px); }
+  0%   { transform: translate(0,0); }
+  100% { transform: translate(30px,20px); }
 }
+/* Scroll hint */
 .hero__scroll-hint {
   position: absolute;
-  bottom: 2.2rem;
+  bottom: clamp(1.2rem,3vh,2.2rem);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -365,8 +389,8 @@ img, svg { display: block; max-width: 100%; }
   animation: pulse-down 1.8s ease-in-out infinite;
 }
 @keyframes pulse-down {
-  0%, 100% { transform: scaleY(1); opacity: 0.5; }
-  50%       { transform: scaleY(1.3); opacity: 1; }
+  0%,100% { transform:scaleY(1);   opacity:0.5; }
+  50%      { transform:scaleY(1.3); opacity:1;   }
 }
 
 /* ── 7. Scenes ───────────────────────────────────────────────── */
@@ -374,6 +398,9 @@ img, svg { display: block; max-width: 100%; }
   position: relative;
   min-height: 110vh;
   overflow: hidden;
+  /* Isolate repaints — prevents parallax layers from dirtying
+     neighbouring sections during scroll */
+  contain: layout;
 }
 .scene__layer {
   position: absolute;
@@ -381,38 +408,38 @@ img, svg { display: block; max-width: 100%; }
   width: 100%;
   height: 100%;
   will-change: transform;
-  transform: translate3d(0, 0, 0);
+  transform: translate3d(0,0,0);
+  /* Allow browser to handle vertical scroll on touch without
+     blocking the scroll event for the parallax */
+  touch-action: pan-y;
 }
 .scene__layer svg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
-.scene__layer--back  { z-index: 1; }
-.scene__layer--mid   { z-index: 2; }
-.scene__layer--front { z-index: 3; }
+.scene__layer--back  { z-index:1; }
+.scene__layer--mid   { z-index:2; }
+.scene__layer--front { z-index:3; }
 
-/* Content overlays */
+/* Content block: opacity-only reveal.
+   No transform here — avoids conflict with JS transform on layers.
+   The entrance is a clean fade; parallax lives only on the layers. */
 .scene__content {
   position: relative;
   z-index: 4;
   min-height: 110vh;
   display: flex;
   align-items: flex-end;
-  padding: 2.5rem;
+  padding: clamp(1.2rem,3vw,2.5rem);
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition: opacity 0.85s var(--ease-out);
 }
-.scene__content.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.scene__content.is-visible { opacity:1; }
 
 /* Glassmorphism card */
 .scene__card {
-  width: min(34rem, 96vw);
-  padding: 1.6rem 1.8rem;
+  width: min(34rem,96vw);
+  padding: clamp(1.2rem,2.5vw,1.6rem) clamp(1.1rem,2.5vw,1.8rem);
   border-radius: var(--radius-card);
   background: var(--panel-dark);
   border: 1px solid var(--border-dark);
@@ -431,80 +458,77 @@ img, svg { display: block; max-width: 100%; }
     0 1px 0 rgba(255,255,255,0.5) inset;
 }
 .scene__card--summit {
-  background: rgba(20, 12, 4, 0.82);
+  background: rgba(20,12,4,0.82);
   border-color: rgba(242,178,78,0.3);
   box-shadow:
     0 8px 48px rgba(242,178,78,0.2),
     0 1px 0 rgba(242,178,78,0.12) inset;
 }
-
 /* Card typography */
 .scene__tag {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: clamp(0.65rem,1.2vw,0.72rem);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 0.65rem;
   opacity: 0.9;
 }
-.scene__card--light .scene__tag { color: #a0600a; }
+.scene__card--light .scene__tag { color:#a0600a; }
 .scene h2 {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-size: clamp(1.8rem,3.5vw,2.8rem);
   line-height: 1;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.55rem;
   letter-spacing: -0.01em;
 }
 .scene__subheading {
-  font-size: 1rem;
+  font-size: clamp(0.92rem,1.5vw,1rem);
   font-weight: 600;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.55rem;
   opacity: 0.85;
 }
 .scene__body {
-  font-size: 0.96rem;
+  font-size: clamp(0.88rem,1.4vw,0.96rem);
   line-height: 1.75;
   opacity: 0.78;
   margin-bottom: 1rem;
 }
 .scene__meta {
   display: flex;
-  gap: 1.2rem;
+  gap: 1rem;
   flex-wrap: wrap;
   padding-top: 0.8rem;
   border-top: 1px solid var(--border-dark);
 }
-.scene__card--light .scene__meta { border-top-color: var(--border-light); }
-.scene__card--summit .scene__meta { border-top-color: rgba(242,178,78,0.2); }
+.scene__card--light .scene__meta { border-top-color:var(--border-light); }
+.scene__card--summit .scene__meta { border-top-color:rgba(242,178,78,0.2); }
 .scene__stat {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: clamp(0.7rem,1.2vw,0.78rem);
   color: var(--text-muted);
   display: flex;
   gap: 0.3rem;
+  align-items: baseline;
 }
-.scene__stat strong {
-  color: var(--accent);
-  font-weight: 500;
-}
-.scene__card--light .scene__stat { color: rgba(0,0,0,0.55); }
-.scene__card--light .scene__stat strong { color: #a0600a; }
-.scene__meta--summit .scene__stat { color: rgba(240,236,228,0.55); }
-.scene__meta--summit .scene__stat strong { color: #ffd980; }
+.scene__stat strong { color:var(--accent); font-weight:500; }
+.scene__card--light .scene__stat { color:rgba(0,0,0,0.55); }
+.scene__card--light .scene__stat strong { color:#a0600a; }
+.scene__card--summit .scene__stat { color:rgba(240,236,228,0.55); }
+.scene__card--summit .scene__stat strong { color:#ffd980; }
 
-/* Scene background gradients */
-.scene--forest    { background: linear-gradient(180deg, #4d6c3f 0%, #2e4b24 42%, #16220f 100%); }
-.scene--waterfall { background: linear-gradient(180deg, #9bd2de 0%, #5f8a96 45%, #2f4349 100%); }
-.scene--cliff     { background: linear-gradient(180deg, #6d7681 0%, #3f4852 42%, #201d23 100%); }
-.scene--snow      { background: linear-gradient(180deg, #e1edf4 0%, #98b0c2 44%, #4c6173 100%); }
-.scene--night     { background: linear-gradient(180deg, #07131e 0%, #14253b 42%, #050608 100%); }
-.scene--summit    { background: linear-gradient(180deg, #ffce76 0%, #c98129 40%, #2d170c 100%); }
+/* Scene backgrounds */
+.scene--forest    { background:linear-gradient(180deg,#4d6c3f 0%,#2e4b24 42%,#16220f 100%); }
+.scene--waterfall { background:linear-gradient(180deg,#9bd2de 0%,#5f8a96 45%,#2f4349 100%); }
+.scene--cliff     { background:linear-gradient(180deg,#6d7681 0%,#3f4852 42%,#201d23 100%); }
+.scene--snow      { background:linear-gradient(180deg,#e1edf4 0%,#98b0c2 44%,#4c6173 100%); }
+.scene--night     { background:linear-gradient(180deg,#07131e 0%,#14253b 42%,#050608 100%); }
+.scene--summit    { background:linear-gradient(180deg,#ffce76 0%,#c98129 40%,#2d170c 100%); }
 
 /* ── 8. Footer ───────────────────────────────────────────────── */
 .footer {
-  padding: 2.5rem 2rem;
+  padding: clamp(1.5rem,4vh,2.5rem) clamp(1rem,4vw,2rem);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -524,21 +548,57 @@ img, svg { display: block; max-width: 100%; }
   font-size: 0.75rem;
   color: var(--accent);
   letter-spacing: 0.06em;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   transition: opacity 0.2s;
 }
-.footer__back:hover { opacity: 0.7; }
+.footer__back:hover { opacity:0.7; }
 
-/* ── 9. Responsive ───────────────────────────────────────────── */
-@media (max-width: 760px) {
-  .hero { padding: 1.2rem; }
-  .hero__title { font-size: clamp(2.8rem, 14vw, 4rem); }
-  .scene__content { padding: 1.2rem; }
-  .scene__card { width: 100%; }
-  .footer { flex-direction: column; text-align: center; }
+/* ═══════════════════════════════════════════════════════════════
+   9. RESPONSIVE
+   Breakpoints: 480 (small phone), 640 (large phone), 768 (tablet)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Small phones ≤ 480px ────────────────────────────────────── */
+@media (max-width:480px) {
+  .hero__title { font-size: clamp(2rem,12vw,2.8rem); }
+  .hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 18rem;
+    margin: 0 auto;
+  }
+  .hero__cta,
+  .hero__ghost { width:100%; }
+  .eyebrow__line { width:18px; }
+  .hero__glow--amber { width:280px; height:280px; }
+  .hero__glow--blue  { width:220px; height:220px; }
+  .scene__meta { gap:0.7rem; }
 }
 
-/* ── 10. Reduced motion ──────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
+/* ── Large phones ≤ 640px ────────────────────────────────────── */
+@media (max-width:640px) {
+  .hero__lead { font-size:0.92rem; line-height:1.7; }
+  .scene h2 { font-size: clamp(1.6rem,6vw,2rem); }
+  .scene__body { font-size:0.88rem; }
+}
+
+/* ── Tablet / nav-hide ≤ 768px ───────────────────────────────── */
+@media (max-width:768px) {
+  .nav-dots  { display:none; }
+  .alt-hud   { display:none; }
+  .footer    { flex-direction:column; text-align:center; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. REDUCED MOTION
+   Disable ALL keyframe animations + long transitions.
+   Content and layout remain fully readable.
+═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion:reduce) {
+  /* Suppress entrance animations */
   .hero__title-line,
   .eyebrow,
   .hero__lead,
@@ -548,7 +608,18 @@ img, svg { display: block; max-width: 100%; }
     opacity: 1 !important;
     transform: none !important;
   }
+  /* Suppress ambient glows */
   .hero__glow--amber,
-  .hero__glow--blue { animation: none; }
-  .scene__content { opacity: 1; transform: none; }
+  .hero__glow--blue { animation:none; }
+  /* Suppress hiker bob */
+  .alt-hud__hiker { animation:none; }
+  /* Suppress scroll hint pulse */
+  .hero__scroll-hint-arrow { animation:none; }
+  /* Suppress progress shimmer */
+  .progress-bar span { animation:none; }
+  /* Show scene content immediately */
+  .scene__content { opacity:1; transition:none; }
+  /* Disable hover lift */
+  .hero__cta:hover,
+  .hero__ghost:hover { transform:none; }
 }
