@@ -6,9 +6,15 @@
     <meta name="description" content="Everest Base Camp Trek — an immersive parallax journey through the Khumbu Valley, Nepal." />
     <meta name="theme-color" content="#06090c" />
     <title>Everest Base Camp Trek · Journey to the Summit</title>
+
+    <!-- Preload the first above-the-fold scene photo to avoid LCP delay -->
+    <link rel="preload" as="image" href="img/s1-forest.jpg" />
+
+    <!-- Google Fonts: display=optional avoids FOIT and doesn't block render -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=optional" rel="stylesheet" />
+
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
@@ -26,9 +32,7 @@
       <a href="#summit"    class="nav-dot" data-label="Kala Patthar"  aria-label="Summit"></a>
     </nav>
 
-    <!-- ══════════════════════════════════════════════════════
-         HERO
-    ══════════════════════════════════════════════════════ -->
+    <!-- ══ HERO ══════════════════════════════════════════════════ -->
     <header class="hero" id="top">
       <canvas class="hero__stars" id="hero-stars" aria-hidden="true"></canvas>
       <div class="hero__content">
@@ -84,24 +88,21 @@
       </div>
     </header>
 
-    <!-- ══════════════════════════════════════════════════════
-         MAIN — 6 SCENES WITH REAL PHOTOS + TREKKER
-    ══════════════════════════════════════════════════════ -->
+    <!-- ══ MAIN — 6 KHUMBU SCENES ════════════════════════════════ -->
     <main>
 
-      <!-- ── Scene 1: Khumbu Valley Forest ──────────────────────── -->
-      <section class="scene scene--forest" id="forest">
+      <!-- Scene 1: Khumbu Valley Forest (Phakding ~2,860 m) -->
+      <section class="scene" id="forest">
+        <!-- loading="eager" so the first scene isn't lazy-loaded (it's visible immediately) -->
         <div class="scene__photo" data-speed="0.25">
-          <img src="img/s1-forest.jpg" alt="Dense rhododendron forest trail in the Khumbu Valley, Nepal" loading="lazy">
+          <img src="img/s1-forest.jpg" alt="Dense rhododendron forest trail in the Khumbu Valley, Nepal"
+               width="1920" height="1080" loading="eager" decoding="async">
         </div>
         <div class="scene__overlay scene__overlay--dark"></div>
-
-        <!-- Trekker walking through this scene -->
-        <div class="scene__trekker" id="trekker-1" aria-hidden="true">
-          <img src="img/trekker.png" alt="" class="trekker__figure">
+        <div class="scene__trekker" aria-hidden="true">
+          <img src="img/trekker.png" alt="" class="trekker__figure" width="220" height="320" decoding="async">
           <div class="trekker__shadow"></div>
         </div>
-
         <div class="scene__content">
           <div class="scene__card">
             <p class="scene__tag">Stage 01 · Khumbu Valley · Phakding</p>
@@ -117,18 +118,17 @@
         </div>
       </section>
 
-      <!-- ── Scene 2: Namche Canyon ──────────────────────────────── -->
-      <section class="scene scene--waterfall" id="waterfall">
+      <!-- Scene 2: Namche Canyon (~3,440 m) -->
+      <section class="scene" id="waterfall">
         <div class="scene__photo" data-speed="0.22">
-          <img src="img/s2-canyon.jpg" alt="Dudh Kosi river gorge with snow-capped peaks above, Namche Bazaar area" loading="lazy">
+          <img src="img/s2-canyon.jpg" alt="Dudh Kosi river gorge with snow-capped peaks above, Namche Bazaar area"
+               width="1920" height="1080" loading="lazy" decoding="async">
         </div>
         <div class="scene__overlay scene__overlay--canyon"></div>
-
-        <div class="scene__trekker" id="trekker-2" aria-hidden="true">
-          <img src="img/trekker.png" alt="" class="trekker__figure">
+        <div class="scene__trekker" aria-hidden="true">
+          <img src="img/trekker.png" alt="" class="trekker__figure" width="220" height="320" decoding="async">
           <div class="trekker__shadow"></div>
         </div>
-
         <div class="scene__content">
           <div class="scene__card scene__card--light">
             <p class="scene__tag">Stage 02 · Dudh Kosi Canyon · Namche</p>
@@ -144,18 +144,17 @@
         </div>
       </section>
 
-      <!-- ── Scene 3: Tengboche / Ama Dablam ────────────────────── -->
-      <section class="scene scene--cliff" id="cliff">
+      <!-- Scene 3: Tengboche / Ama Dablam (~3,867 m) -->
+      <section class="scene" id="cliff">
         <div class="scene__photo" data-speed="0.20">
-          <img src="img/s3-tengboche.jpg" alt="Ama Dablam peak above Tengboche alpine meadow, Nepal" loading="lazy">
+          <img src="img/s3-tengboche.jpg" alt="Ama Dablam peak above Tengboche alpine meadow, Nepal"
+               width="1920" height="1080" loading="lazy" decoding="async">
         </div>
         <div class="scene__overlay scene__overlay--dark"></div>
-
-        <div class="scene__trekker" id="trekker-3" aria-hidden="true">
-          <img src="img/trekker.png" alt="" class="trekker__figure">
+        <div class="scene__trekker" aria-hidden="true">
+          <img src="img/trekker.png" alt="" class="trekker__figure" width="220" height="320" decoding="async">
           <div class="trekker__shadow"></div>
         </div>
-
         <div class="scene__content">
           <div class="scene__card">
             <p class="scene__tag">Stage 03 · Tengboche · Ama Dablam</p>
@@ -171,18 +170,17 @@
         </div>
       </section>
 
-      <!-- ── Scene 4: Lobuche / Glacier Moraine ─────────────────── -->
-      <section class="scene scene--snow" id="snow">
+      <!-- Scene 4: Lobuche / Glacier Moraine (~4,940 m) -->
+      <section class="scene" id="snow">
         <div class="scene__photo" data-speed="0.18">
-          <img src="img/s4-moraine.jpg" alt="Khumbu glacier moraine with massive Nuptse ice wall, Lobuche Nepal" loading="lazy">
+          <img src="img/s4-moraine.jpg" alt="Khumbu glacier moraine with massive Nuptse ice wall, Lobuche Nepal"
+               width="1920" height="1080" loading="lazy" decoding="async">
         </div>
         <div class="scene__overlay scene__overlay--cold"></div>
-
-        <div class="scene__trekker" id="trekker-4" aria-hidden="true">
-          <img src="img/trekker.png" alt="" class="trekker__figure trekker__figure--cold">
+        <div class="scene__trekker" aria-hidden="true">
+          <img src="img/trekker.png" alt="" class="trekker__figure trekker__figure--cold" width="220" height="320" decoding="async">
           <div class="trekker__shadow"></div>
         </div>
-
         <div class="scene__content">
           <div class="scene__card scene__card--light">
             <p class="scene__tag">Stage 04 · Lobuche · Khumbu Glacier</p>
@@ -198,18 +196,17 @@
         </div>
       </section>
 
-      <!-- ── Scene 5: Everest Base Camp Night ───────────────────── -->
-      <section class="scene scene--night" id="night">
+      <!-- Scene 5: Everest Base Camp Night (~5,364 m) -->
+      <section class="scene" id="night">
         <div class="scene__photo" data-speed="0.15">
-          <img src="img/s5-night.jpg" alt="Everest Base Camp at night with glowing tents and Milky Way" loading="lazy">
+          <img src="img/s5-night.jpg" alt="Everest Base Camp at night with glowing tents and Milky Way"
+               width="1920" height="1080" loading="lazy" decoding="async">
         </div>
         <div class="scene__overlay scene__overlay--night"></div>
-
-        <div class="scene__trekker" id="trekker-5" aria-hidden="true">
-          <img src="img/trekker.png" alt="" class="trekker__figure trekker__figure--night">
+        <div class="scene__trekker" aria-hidden="true">
+          <img src="img/trekker.png" alt="" class="trekker__figure trekker__figure--night" width="220" height="320" decoding="async">
           <div class="trekker__shadow trekker__shadow--night"></div>
         </div>
-
         <div class="scene__content">
           <div class="scene__card">
             <p class="scene__tag">Stage 05 · Everest Base Camp · Night</p>
@@ -225,25 +222,24 @@
         </div>
       </section>
 
-      <!-- ── Scene 6: Kala Patthar Sunrise ──────────────────────── -->
-      <section class="scene scene--summit" id="summit">
+      <!-- Scene 6: Kala Patthar Sunrise (~5,644 m) -->
+      <section class="scene" id="summit">
         <div class="scene__photo" data-speed="0.12">
-          <img src="img/s6-sunrise.jpg" alt="Sunrise from Kala Patthar with Everest silhouette and prayer flags" loading="lazy">
+          <img src="img/s6-sunrise.jpg" alt="Sunrise from Kala Patthar with Everest silhouette and prayer flags"
+               width="1920" height="1080" loading="lazy" decoding="async">
         </div>
         <div class="scene__overlay scene__overlay--summit"></div>
-
-        <div class="scene__trekker" id="trekker-6" aria-hidden="true">
-          <img src="img/trekker.png" alt="" class="trekker__figure trekker__figure--summit">
+        <div class="scene__trekker" aria-hidden="true">
+          <img src="img/trekker.png" alt="" class="trekker__figure trekker__figure--summit" width="220" height="320" decoding="async">
           <div class="trekker__shadow trekker__shadow--summit"></div>
         </div>
-
         <div class="scene__content">
           <div class="scene__card scene__card--summit">
             <p class="scene__tag">Stage 06 · Kala Patthar · Khumbu</p>
             <h2>The Summit</h2>
             <p class="scene__subheading">Sunrise at 5,644 metres. Everest ignites.</p>
             <p class="scene__body">Gold floods the south face of Everest. Nuptse's ridge glows amber. The prayer flags tear and snap in the wind. Below, everything is cloud.</p>
-            <div class="scene__meta scene__meta--summit">
+            <div class="scene__meta">
               <span class="scene__stat"><strong>5,644</strong>m</span>
               <span class="scene__stat"><strong>Temp</strong> −20 °C</span>
               <span class="scene__stat"><strong>Wind</strong> 55 km/h</span>
