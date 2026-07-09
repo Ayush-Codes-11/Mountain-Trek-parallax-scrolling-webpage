@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Journey to the Summit — a cinematic parallax scrolling experience through six stages of the mountain." />
+    <meta name="description" content="Everest Base Camp Trek — an immersive parallax journey through the Khumbu Valley, Nepal." />
     <meta name="theme-color" content="#06090c" />
-    <title>Journey to the Summit</title>
+    <title>Everest Base Camp Trek · Journey to the Summit</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -13,36 +13,28 @@
   </head>
   <body>
 
-    <!-- ── Scroll progress bar ────────────────────────────── -->
-    <div class="progress-bar" aria-hidden="true">
-      <span id="progress-fill"></span>
-    </div>
-
-    <!-- ── Cursor glow ────────────────────────────────────── -->
+    <div class="progress-bar" aria-hidden="true"><span id="progress-fill"></span></div>
     <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
-    <!-- ── Sticky nav dots ───────────────────────────────── -->
     <nav class="nav-dots" aria-label="Section navigation">
-      <a href="#top"       class="nav-dot" data-label="Hero"      aria-label="Go to hero"></a>
-      <a href="#forest"    class="nav-dot" data-label="Forest"    aria-label="Go to forest"></a>
-      <a href="#waterfall" class="nav-dot" data-label="Waterfall" aria-label="Go to waterfall"></a>
-      <a href="#cliff"     class="nav-dot" data-label="Cliff"     aria-label="Go to cliff"></a>
-      <a href="#snow"      class="nav-dot" data-label="Snowline"  aria-label="Go to snowline"></a>
-      <a href="#night"     class="nav-dot" data-label="Night"     aria-label="Go to night camp"></a>
-      <a href="#summit"    class="nav-dot" data-label="Summit"    aria-label="Go to summit"></a>
+      <a href="#top"       class="nav-dot" data-label="Start"      aria-label="Go to start"></a>
+      <a href="#forest"    class="nav-dot" data-label="Forest"      aria-label="Go to Khumbu forest"></a>
+      <a href="#waterfall" class="nav-dot" data-label="Namche"      aria-label="Go to Namche canyon"></a>
+      <a href="#cliff"     class="nav-dot" data-label="Tengboche"   aria-label="Go to Tengboche"></a>
+      <a href="#snow"      class="nav-dot" data-label="Lobuche"     aria-label="Go to Lobuche"></a>
+      <a href="#night"     class="nav-dot" data-label="Base Camp"   aria-label="Go to base camp"></a>
+      <a href="#summit"    class="nav-dot" data-label="Kala Patthar" aria-label="Go to summit"></a>
     </nav>
 
     <!-- ══════════════════════════════════════════════════════
          HERO
     ══════════════════════════════════════════════════════ -->
     <header class="hero" id="top">
-      <!-- Animated particle stars -->
       <canvas class="hero__stars" id="hero-stars" aria-hidden="true"></canvas>
-
       <div class="hero__content">
         <p class="eyebrow">
           <span class="eyebrow__line"></span>
-          A cinematic scroll experience
+          Everest Base Camp Trek · Nepal
         </p>
         <h1 class="hero__title">
           <span class="hero__title-line">Journey</span>
@@ -50,8 +42,8 @@
           <span class="hero__title-line">Summit</span>
         </h1>
         <p class="hero__lead">
-          Six stages. One mountain. An immersive, layered scroll through forest,
-          waterfall, cliff, snow, night, and sunrise — built to feel like movement.
+          Six stages through the Khumbu Valley — rhododendron forest, glacial canyon,
+          alpine meadow, moraine, base camp, and sunrise from Kala Patthar.
         </p>
         <div class="hero__actions">
           <a class="hero__cta" href="#forest" id="cta-start">
@@ -64,13 +56,11 @@
         </div>
       </div>
 
-      <!-- Altitude ticker (fixed position, driven by scroll) -->
       <aside class="alt-hud" id="alt-hud" aria-label="Current altitude">
         <span class="alt-hud__label">ALT</span>
-        <div class="alt-hud__track" role="progressbar" aria-valuemin="1200" aria-valuemax="4350" aria-valuenow="1200">
+        <div class="alt-hud__track" role="progressbar" aria-valuemin="2860" aria-valuemax="5644" aria-valuenow="2860">
           <div class="alt-hud__fill" id="alt-fill"></div>
           <div class="alt-hud__marker" id="alt-marker">
-            <!-- Hiker SVG -->
             <svg class="alt-hud__hiker" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
               <circle cx="13" cy="4"  r="3.2"/>
               <rect   x="5"  y="8"  width="5"   height="8"  rx="1"/>
@@ -82,7 +72,7 @@
           </div>
         </div>
         <div class="alt-hud__readout">
-          <span id="alt-value">1,200</span><span class="alt-hud__unit">m</span>
+          <span id="alt-value">2,860</span><span class="alt-hud__unit">m</span>
         </div>
       </aside>
 
@@ -95,213 +85,734 @@
     </header>
 
     <!-- ══════════════════════════════════════════════════════
-         MAIN — 6 SCENES
+         MAIN — 6 KHUMBU SCENES
     ══════════════════════════════════════════════════════ -->
     <main>
 
-      <!-- ── Scene 1: Forest ─────────────────────────────── -->
+      <!-- ══════════════════════════════════════════════════
+           SCENE 1 · KHUMBU FOREST  (Phakding ~2,860 m)
+           Dense rhododendron & pine forest, morning mist,
+           narrow river valley.
+      ══════════════════════════════════════════════════ -->
       <section class="scene scene--forest" id="forest">
+
+        <!-- Back: distant misty forested ridges -->
         <div class="scene__layer scene__layer--back" data-speed="0.12">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800H1200V554.5L1045 514L898 574L718 484L562 564L398 494L231 584L0 534V800Z" fill="#4b5d3b" opacity="0.8"/>
-            <path d="M0 800H1200V656L1045 619L898 679L718 589L562 669L398 599L231 689L0 639V800Z" fill="#263828" opacity="0.9"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s1-ridge-far" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#6e9aaa" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#2c4f38" stop-opacity="0.80"/>
+              </linearGradient>
+            </defs>
+            <!-- Soft morning haze band -->
+            <rect x="0" y="240" width="1440" height="160" fill="rgba(190,218,224,0.13)"/>
+            <!-- Far ridge body -->
+            <path fill="url(#s1-ridge-far)" d="
+              M0,800 L0,496 C40,488 85,482 130,478 C175,474 220,480 275,474
+              C330,468 390,476 450,470 C510,464 570,472 635,466 C700,460 760,468
+              825,462 C890,456 950,464 1015,460 C1080,456 1140,462 1200,466
+              C1260,470 1320,474 1380,478 L1440,482 L1440,800 Z"/>
+            <!-- Far ridge pine canopy (spiky silhouette) -->
+            <path fill="#1e3826" opacity="0.55" d="
+              M0,800 L0,498
+              L6,482 L12,498 L19,494 L25,476 L31,494 L40,490 L46,470 L52,490
+              L62,486 L68,466 L74,486 L86,482 L92,462 L98,482
+              L112,478 L118,458 L124,478 L140,474 L146,454 L152,474
+              L170,470 L176,450 L182,470 L202,466 L208,446 L214,466
+              L236,462 L242,442 L248,462 L272,458 L278,438 L284,458
+              L310,454 L316,434 L322,454 L350,450 L356,430 L362,450
+              L394,446 L400,426 L406,446 L440,442 L446,422 L452,442
+              L490,438 L496,418 L502,438 L544,434 L550,414 L556,434
+              L600,430 L606,410 L612,430 L660,428 L666,408 L672,428
+              L724,426 L730,406 L736,426 L790,424 L796,404 L802,424
+              L860,422 L866,402 L872,422 L934,420 L940,400 L946,420
+              L1010,418 L1016,398 L1022,418 L1090,420 L1096,400 L1102,420
+              L1172,422 L1178,402 L1184,422 L1256,424 L1262,404 L1268,424
+              L1342,426 L1348,406 L1354,426 L1430,428 L1436,408 L1440,428
+              L1440,800 Z"/>
           </svg>
         </div>
+
+        <!-- Mid: dense forested slope, pine skyline -->
         <div class="scene__layer scene__layer--mid" data-speed="0.28">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800H1200V709L1090 689L985.5 724L854.5 669L748 714L600 649L450 714L313 654L151.5 729L0 694V800Z" fill="#2b4a24"/>
-            <path d="M-10 800L15 755L40 800H-10ZM180 800L205 730L230 800H180ZM370 800L395 755L420 800H370ZM530 800L555 730L580 800H530ZM720 800L745 755L770 800H720ZM860 800L885 730L910 800H860ZM1040 800L1065 755L1090 800H1040Z" fill="#1d2f1a"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Forest slope base -->
+            <path fill="#183422" opacity="0.9" d="
+              M0,800 L0,630 C60,618 130,610 210,614 C290,618 370,606 460,610
+              C550,614 640,602 730,608 C820,614 910,600 1000,606
+              C1090,612 1180,600 1270,606 C1340,610 1400,618 1440,622
+              L1440,800 Z"/>
+            <!-- Mid-slope pine tree skyline -->
+            <path fill="#0d1e12" d="
+              M0,800 L0,635
+              L8,610 L16,635 L26,628 L34,600 L42,628
+              L56,622 L64,592 L72,622 L90,616 L98,584 L106,616
+              L128,610 L136,578 L144,610 L170,604 L178,572 L186,604
+              L216,598 L224,566 L232,598 L266,592 L274,560 L282,592
+              L320,586 L328,554 L336,586 L378,580 L386,548 L394,580
+              L440,574 L448,542 L456,574 L508,568 L516,536 L524,568
+              L580,562 L588,530 L596,562 L656,556 L664,524 L672,556
+              L736,550 L744,518 L752,550 L820,546 L828,514 L836,546
+              L908,542 L916,510 L924,542 L1000,538 L1008,506 L1016,538
+              L1096,534 L1104,502 L1112,534 L1196,530 L1204,498 L1212,530
+              L1300,526 L1308,494 L1316,526 L1406,522 L1414,490 L1440,522
+              L1440,800 Z"/>
           </svg>
         </div>
+
+        <!-- Front: near dark forest floor + morning sun circle -->
         <div class="scene__layer scene__layer--front" data-speed="0.45">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800H1200V749L1090 729L985.5 764L854.5 709L748 754L600 689L450 754L313 694L151.5 769L0 734V800Z" fill="#14210f"/>
-            <circle cx="1030" cy="120" r="48" fill="#f4b44d" opacity="0.75"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Morning sun in forest gap -->
+            <circle cx="1080" cy="130" r="52" fill="#f4d070" opacity="0.55"/>
+            <circle cx="1080" cy="130" r="80" fill="#f4d070" opacity="0.12"/>
+            <!-- Near forest silhouette (large close trees) -->
+            <path fill="#07100a" d="
+              M0,800 L0,730
+              L18,686 L36,730 L68,724 L86,676 L104,724
+              L160,718 L180,666 L200,718 L280,712 L302,658 L324,712
+              L440,706 L464,650 L488,706 L640,700 L666,642 L692,700
+              L880,694 L908,634 L936,694 L1160,688 L1190,626 L1220,688
+              L1440,682 L1440,800 Z"/>
           </svg>
         </div>
+
         <div class="scene__content">
           <div class="scene__card">
-            <p class="scene__tag">Stage 01 · Forest Base</p>
+            <p class="scene__tag">Stage 01 · Khumbu Valley · Phakding</p>
             <h2>The Trailhead</h2>
             <p class="scene__subheading">Where the forest swallows the path.</p>
-            <p class="scene__body">The scent of pine and damp earth welcomes you into the first stretch of the journey.</p>
+            <p class="scene__body">Rhododendron blooms and pine canopy close above you. The Dudh Kosi river rushes somewhere below, unseen but always heard.</p>
             <div class="scene__meta">
-              <span class="scene__stat"><strong>1,200</strong>m</span>
-              <span class="scene__stat"><strong>Temp</strong> 12°C</span>
+              <span class="scene__stat"><strong>2,860</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> 12 °C</span>
+              <span class="scene__stat"><strong>Day</strong> 1</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── Scene 2: Waterfall ──────────────────────────── -->
+      <!-- ══════════════════════════════════════════════════
+           SCENE 2 · NAMCHE BAZAAR CANYON  (~3,440 m)
+           Dudh Kosi river gorge, first snow peaks visible,
+           suspension bridges, pine on rocky slopes.
+      ══════════════════════════════════════════════════ -->
       <section class="scene scene--waterfall" id="waterfall">
+
+        <!-- Back: clear sky + distant snow peaks with gradient fills -->
         <div class="scene__layer scene__layer--back" data-speed="0.12">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="1200" height="800" fill="#8bc3d2"/>
-            <path d="M1200 800V480L940 420L750 500L560 410L390 510L210 440L0 530V800H1200Z" fill="#5a7b89"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <!-- Snow peak gradient: white summit → grey rock base -->
+              <linearGradient id="s2-pk1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#dce8ee"/>
+                <stop offset="30%"  stop-color="#b8ccd4"/>
+                <stop offset="70%"  stop-color="#7c8e96"/>
+                <stop offset="100%" stop-color="#4a5860"/>
+              </linearGradient>
+              <linearGradient id="s2-pk2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#e2ecf0"/>
+                <stop offset="25%"  stop-color="#baced6"/>
+                <stop offset="65%"  stop-color="#7a8e98"/>
+                <stop offset="100%" stop-color="#4e606a"/>
+              </linearGradient>
+              <linearGradient id="s2-pk3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#d0dde4"/>
+                <stop offset="35%"  stop-color="#9cb0ba"/>
+                <stop offset="100%" stop-color="#586870"/>
+              </linearGradient>
+            </defs>
+            <!-- Atmospheric haze at horizon -->
+            <rect x="0" y="280" width="1440" height="80" fill="rgba(196,218,228,0.18)"/>
+            <!-- Far left peak (Thamserku-style) -->
+            <path fill="url(#s2-pk1)" d="
+              M0,800 L0,560 L40,545 L80,528 L120,508 L155,485 L180,460
+              L200,432 L215,405 L225,380 L232,355 L237,332 L240,312
+              L243,292 L245,275 L247,260 L248,248 L249,238 L250,230
+              L251,224 L252,220 L253,218 L254,220 L256,228 L259,240
+              L263,258 L268,280 L275,308 L285,340 L297,376 L312,414
+              L330,452 L352,490 L378,524 L408,553 L442,575
+              L480,590 L520,600 L560,606 L600,608 L640,607
+              L0,608 L0,800 Z" opacity="0.9"/>
+            <!-- Central peak cluster -->
+            <path fill="url(#s2-pk2)" d="
+              M460,800 L460,580 L500,560 L540,536 L575,508 L605,476
+              L628,442 L645,408 L656,374 L663,342 L667,314
+              L669,290 L670,270 L671,254 L672,240 L673,228 L674,218
+              L675,210 L676,204 L678,200 L680,198 L682,200 L685,208
+              L689,220 L695,238 L703,262 L714,292 L728,328 L746,368
+              L768,408 L794,448 L824,484 L858,516 L896,543
+              L938,565 L984,581 L1034,593 L1086,600
+              L1086,800 Z" opacity="0.92"/>
+            <!-- Right subsidiary peak -->
+            <path fill="url(#s2-pk3)" d="
+              M920,800 L920,610 L970,592 L1018,570 L1060,544 L1096,514
+              L1126,480 L1149,444 L1165,408 L1175,374 L1180,344
+              L1182,320 L1183,300 L1184,284 L1185,272 L1187,266
+              L1189,268 L1192,278 L1197,296 L1205,320 L1216,352
+              L1232,390 L1252,430 L1278,470 L1308,508 L1342,542
+              L1380,570 L1420,592 L1440,602 L1440,800 Z" opacity="0.88"/>
           </svg>
         </div>
+
+        <!-- Mid: rocky canyon walls, valley sides -->
         <div class="scene__layer scene__layer--mid" data-speed="0.26">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M1200 800V605L990 565L840 645L670 565L500 655L340 595L180 665L0 620V800H1200Z" fill="#3f6172"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s2-rock" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#6a7060"/>
+                <stop offset="100%" stop-color="#30281e"/>
+              </linearGradient>
+            </defs>
+            <!-- Left canyon wall -->
+            <path fill="url(#s2-rock)" d="
+              M0,800 L0,560 L30,548 L55,530 L72,508 L84,484 L90,462
+              L94,444 L98,432 L104,428 L112,434 L124,448 L142,470
+              L164,496 L192,524 L226,552 L266,578 L310,598 L360,614
+              L414,624 L472,630 L0,630 L0,800 Z" opacity="0.95"/>
+            <!-- Right canyon wall -->
+            <path fill="url(#s2-rock)" d="
+              M1440,800 L1440,540 L1408,528 L1370,510 L1326,488 L1278,466
+              L1230,450 L1190,442 L1160,444 L1138,456 L1124,476 L1116,502
+              L1114,530 L1118,558 L1128,584 L1144,608 L1166,628
+              L1194,642 L1228,652 L1440,652 L1440,800 Z" opacity="0.95"/>
+            <!-- Glacial river — pale blue stripe at valley bottom -->
+            <path fill="#a8cad8" opacity="0.28" d="
+              M380,800 C420,760 460,730 500,720 C540,710 580,716 620,712
+              C660,708 700,714 740,718 C780,722 820,718 860,720
+              C900,722 940,718 980,722 L1060,800 Z"/>
+            <!-- Pine trees on rocky slopes -->
+            <path fill="#1a2e18" opacity="0.85" d="
+              M0,800 L0,636 L8,618 L16,636 L26,630 L34,610 L42,630
+              L56,624 L64,602 L72,624 L90,618 L98,596 L106,618
+              L0,618 L0,800 Z"/>
+            <path fill="#1a2e18" opacity="0.85" d="
+              M1200,800 L1200,658 L1210,638 L1220,658 L1234,650 L1244,628 L1254,650
+              L1272,644 L1282,622 L1292,644 L1314,638 L1324,616 L1334,638
+              L1360,632 L1370,610 L1380,632 L1408,626 L1418,604 L1428,626
+              L1440,622 L1440,800 Z"/>
           </svg>
         </div>
+
+        <!-- Front: near canyon floor, very dark -->
         <div class="scene__layer scene__layer--front" data-speed="0.42">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M1200 800V720.5L941.5 680.5L702 730.5L482.5 695.5L262 757.5L0 727.5V800H1200Z" fill="#22343e"/>
-            <path d="M362.5 800C432.5 660 512.5 610 582.5 620C672.5 635 732.5 710 842.5 800" stroke="#eaf7ff" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.6"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="#141008" d="
+              M0,800 L0,740 C60,728 130,718 210,722 C290,726 370,714 460,718
+              C550,722 640,710 730,716 C820,722 910,710 1010,716
+              C1110,722 1220,712 1320,718 C1380,722 1420,728 1440,732
+              L1440,800 Z"/>
           </svg>
         </div>
+
         <div class="scene__content">
           <div class="scene__card scene__card--light">
-            <p class="scene__tag">Stage 02 · Waterfall</p>
-            <h2>The River Opens</h2>
-            <p class="scene__subheading">The trail turns to spray and silver light.</p>
-            <p class="scene__body">The canyon grows louder with each step, and the air feels sharper and brighter.</p>
+            <p class="scene__tag">Stage 02 · Dudh Kosi Canyon · Namche</p>
+            <h2>The Canyon Opens</h2>
+            <p class="scene__subheading">Snow peaks emerge above the gorge.</p>
+            <p class="scene__body">Thamserku and Kangtega appear for the first time — white summits floating above grey rock walls. The river is jade-green below.</p>
             <div class="scene__meta">
-              <span class="scene__stat"><strong>1,850</strong>m</span>
-              <span class="scene__stat"><strong>Temp</strong> 8°C</span>
+              <span class="scene__stat"><strong>3,440</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> 6 °C</span>
+              <span class="scene__stat"><strong>Day</strong> 3</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── Scene 3: Cliff ──────────────────────────────── -->
+      <!-- ══════════════════════════════════════════════════
+           SCENE 3 · TENGBOCHE  (~3,867 m)
+           Ama Dablam's spire dominates. Alpine meadows,
+           yak pastures, monastery, mani stones.
+      ══════════════════════════════════════════════════ -->
       <section class="scene scene--cliff" id="cliff">
+
+        <!-- Back: Ama Dablam-inspired dramatic peak + flanking range -->
         <div class="scene__layer scene__layer--back" data-speed="0.11">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="1200" height="800" fill="#6a737e"/>
-            <path d="M0 800V560L170 430L320 500L470 370L650 470L830 350L1010 480L1200 420V800H0Z" fill="#4c525c" opacity="0.75"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <!-- Ama Dablam: white-blue snow top, grey-brown rock body -->
+              <linearGradient id="s3-ama" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#eaf1f4"/>
+                <stop offset="20%"  stop-color="#c8d8e0"/>
+                <stop offset="50%"  stop-color="#8a9ea8"/>
+                <stop offset="80%"  stop-color="#5e6e74"/>
+                <stop offset="100%" stop-color="#3a4044"/>
+              </linearGradient>
+              <linearGradient id="s3-flank" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#d4e2e8"/>
+                <stop offset="40%"  stop-color="#92a8b0"/>
+                <stop offset="100%" stop-color="#484e52"/>
+              </linearGradient>
+              <!-- Ama Dablam hanging glacier (distinctive feature) -->
+              <linearGradient id="s3-glacier" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"   stop-color="#dceef4"/>
+                <stop offset="100%" stop-color="#a0b8c2"/>
+              </linearGradient>
+            </defs>
+            <!-- Left flanking peaks -->
+            <path fill="url(#s3-flank)" d="
+              M0,800 L0,620 L40,600 L80,575 L118,546 L150,514 L175,480
+              L193,446 L205,412 L212,382 L216,358 L218,340 L220,332
+              L222,336 L226,348 L233,368 L244,396 L260,430 L282,466
+              L310,502 L344,535 L384,562 L430,584 L480,598 L0,598 L0,800 Z" opacity="0.8"/>
+            <!-- Ama Dablam main spire (central, dramatic) -->
+            <path fill="url(#s3-ama)" d="
+              M500,800 L500,640 L540,618 L580,592 L614,562 L642,528
+              L663,490 L678,450 L687,408 L692,368 L694,332 L695,300
+              L695,274 L695,253 L695,236 L695,222 L696,210 L697,200
+              L698,192 L699,186 L700,182 L701,180 L702,182 L703,186
+              L705,194 L708,206 L712,222 L717,242 L724,266 L733,296
+              L745,330 L760,368 L779,408 L802,448 L830,486 L862,521
+              L898,552 L938,578 L982,600 L1030,617 L1082,629 L1136,638
+              L1136,800 Z" opacity="0.95"/>
+            <!-- Hanging glacier on Ama Dablam (distinctive blob mid-face) -->
+            <path fill="url(#s3-glacier)" d="
+              M700,360 C718,348 736,346 752,354 C768,362 778,376 780,394
+              C782,412 776,428 762,438 C748,448 730,450 716,444
+              C702,438 692,424 690,408 C688,392 694,372 700,360 Z" opacity="0.7"/>
+            <!-- Right flanking peak -->
+            <path fill="url(#s3-flank)" d="
+              M1000,800 L1000,645 L1040,625 L1080,600 L1116,572 L1146,540
+              L1170,504 L1188,466 L1200,428 L1207,394 L1210,366
+              L1212,348 L1214,348 L1218,360 L1225,382 L1236,412
+              L1252,448 L1274,486 L1302,522 L1336,555 L1376,582
+              L1420,604 L1440,614 L1440,800 Z" opacity="0.82"/>
           </svg>
         </div>
+
+        <!-- Mid: alpine meadow, brown-green slope -->
         <div class="scene__layer scene__layer--mid" data-speed="0.24">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V650L160 580L240 610L330 540L450 620L570 500L730 610L910 560L1090 640L1200 610V800H0Z" fill="#2f3640"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s3-meadow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#5a5e40"/>
+                <stop offset="100%" stop-color="#2a2818"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#s3-meadow)" d="
+              M0,800 L0,660 C60,648 130,638 210,642 C290,646 380,634 480,638
+              C580,642 680,630 790,636 C900,642 1010,630 1120,636
+              C1230,642 1340,636 1440,640 L1440,800 Z"/>
+            <!-- Scattered rocks on meadow -->
+            <ellipse cx="200" cy="660" rx="28" ry="12" fill="#1e1c10" opacity="0.7"/>
+            <ellipse cx="480" cy="650" rx="22" ry="9"  fill="#1e1c10" opacity="0.65"/>
+            <ellipse cx="780" cy="655" rx="34" ry="13" fill="#1e1c10" opacity="0.7"/>
+            <ellipse cx="1100" cy="648" rx="20" ry="8" fill="#1e1c10" opacity="0.6"/>
+            <ellipse cx="1340" cy="652" rx="26" ry="10" fill="#1e1c10" opacity="0.65"/>
           </svg>
         </div>
+
+        <!-- Front: foreground rocks + prayer flag lines -->
         <div class="scene__layer scene__layer--front" data-speed="0.38">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V701.5L240.5 681.5L482.5 725L720.5 658L960 745L1200 701.5V800H0Z" fill="#14181f"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="#1a1608" d="
+              M0,800 L0,740 C80,728 170,718 270,722 C370,726 470,714 580,720
+              C690,726 800,714 920,720 C1040,726 1160,716 1280,720
+              C1360,723 1410,730 1440,734 L1440,800 Z"/>
+            <!-- Prayer flags (lung ta) strung across foreground -->
+            <g opacity="0.55">
+              <line x1="80"  y1="725" x2="320"  y2="742" stroke="#c0391a" stroke-width="1.2"/>
+              <line x1="320" y1="742" x2="560"  y2="728" stroke="#c0391a" stroke-width="1.2"/>
+              <line x1="560" y1="728" x2="800"  y2="738" stroke="#c0391a" stroke-width="1.2"/>
+              <!-- Flag rectangles along first string -->
+              <rect x="120"  y="723" width="12" height="8" fill="#d04020" opacity="0.7"/>
+              <rect x="160"  y="726" width="12" height="8" fill="#2050a0" opacity="0.7"/>
+              <rect x="200"  y="729" width="12" height="8" fill="#e0c020" opacity="0.7"/>
+              <rect x="240"  y="732" width="12" height="8" fill="#20a040" opacity="0.7"/>
+              <rect x="280"  y="735" width="12" height="8" fill="#e0e0e0" opacity="0.6"/>
+            </g>
           </svg>
         </div>
+
         <div class="scene__content">
           <div class="scene__card">
-            <p class="scene__tag">Stage 03 · Cliff Bridge</p>
-            <h2>Over the Edge</h2>
-            <p class="scene__subheading">A narrow crossing suspended above the valley.</p>
-            <p class="scene__body">The bridge feels thin and delicate, but the view makes every step worth it.</p>
+            <p class="scene__tag">Stage 03 · Tengboche · Ama Dablam</p>
+            <h2>The Spire Appears</h2>
+            <p class="scene__subheading">Ama Dablam — the mother's jewel box.</p>
+            <p class="scene__body">The peak rises like a cathedral. Its hanging glacier glitters midway up the south face. Prayer flags snap in the thin, cold wind.</p>
             <div class="scene__meta">
-              <span class="scene__stat"><strong>2,600</strong>m</span>
-              <span class="scene__stat"><strong>Temp</strong> 3°C</span>
+              <span class="scene__stat"><strong>3,867</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> 2 °C</span>
+              <span class="scene__stat"><strong>Day</strong> 5</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── Scene 4: Snow ───────────────────────────────── -->
+      <!-- ══════════════════════════════════════════════════
+           SCENE 4 · LOBUCHE / KHUMBU GLACIER  (~4,940 m)
+           Nuptse-Lhotse wall fills the sky. Khumbu glacier
+           moraine — endless grey rubble and ice.
+      ══════════════════════════════════════════════════ -->
       <section class="scene scene--snow" id="snow">
-        <div class="scene__layer scene__layer--back" data-speed="0.1">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="1200" height="800" fill="#d7e7f2"/>
-            <path d="M0 800V540L150 450L260 520L380 400L540 500L640 360L810 520L980 420L1200 500V800H0Z" fill="#8aa7bb" opacity="0.85"/>
+
+        <!-- Back: massive Nuptse-Lhotse wall (white gradient, fills sky) -->
+        <div class="scene__layer scene__layer--back" data-speed="0.10">
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <!-- Nuptse: icy white summit → cold grey base -->
+              <linearGradient id="s4-nup" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#e8eff4"/>
+                <stop offset="18%"  stop-color="#c8d8e4"/>
+                <stop offset="45%"  stop-color="#96aab8"/>
+                <stop offset="75%"  stop-color="#6a7e8a"/>
+                <stop offset="100%" stop-color="#3e4e58"/>
+              </linearGradient>
+              <linearGradient id="s4-lho" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#eef3f6"/>
+                <stop offset="22%"  stop-color="#ccdae2"/>
+                <stop offset="55%"  stop-color="#98acb8"/>
+                <stop offset="100%" stop-color="#48586a"/>
+              </linearGradient>
+            </defs>
+            <!-- Cold sky atmosphere -->
+            <rect x="0" y="0" width="1440" height="300" fill="rgba(160,190,210,0.1)"/>
+            <!-- Nuptse wall — massive, fills left half of sky -->
+            <path fill="url(#s4-nup)" d="
+              M-10,800 L-10,580 L30,556 L70,528 L110,496 L148,460
+              L182,420 L210,378 L232,334 L248,290 L258,250 L264,214
+              L267,182 L268,156 L268,134 L268,116 L268,102 L269,90
+              L270,80 L271,72 L273,66 L276,62 L280,60 L284,62
+              L290,68 L298,78 L309,94 L323,116 L342,144 L366,178
+              L396,218 L432,260 L474,304 L522,348 L574,390 L630,428
+              L690,462 L754,492 L820,518 L888,540 L958,558 L1030,572
+              L1100,582 L1170,588 L1240,590 L1310,588 L1380,582 L1440,574
+              L1440,800 Z" opacity="0.94"/>
+            <!-- Lhotse shoulder (right side) -->
+            <path fill="url(#s4-lho)" d="
+              M900,800 L900,595 L960,578 L1020,556 L1076,530 L1126,500
+              L1170,466 L1206,430 L1234,392 L1253,354 L1264,318
+              L1268,286 L1268,260 L1268,238 L1269,220 L1271,206
+              L1274,200 L1278,200 L1284,206 L1292,220 L1303,242
+              L1320,270 L1342,306 L1370,346 L1404,390 L1440,436
+              L1440,800 Z" opacity="0.88"/>
           </svg>
         </div>
+
+        <!-- Mid: Khumbu glacier moraine rubble -->
         <div class="scene__layer scene__layer--mid" data-speed="0.22">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V620L220 500L350 580L520 450L710 570L920 450L1200 560V800H0Z" fill="#5f7f97"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s4-moraine" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#7a7260"/>
+                <stop offset="100%" stop-color="#30281e"/>
+              </linearGradient>
+            </defs>
+            <!-- Moraine surface (irregular, rubble-like) -->
+            <path fill="url(#s4-moraine)" d="
+              M0,800 L0,645 L20,638 L45,630 L62,622 L84,614 L108,610
+              L136,608 L166,610 L198,614 L232,616 L268,612 L306,608
+              L346,606 L388,608 L432,612 L478,614 L526,610 L576,608
+              L628,610 L682,614 L738,612 L796,608 L856,606 L918,610
+              L982,614 L1048,612 L1116,608 L1186,608 L1258,612
+              L1332,618 L1398,626 L1440,632 L1440,800 Z"/>
+            <!-- Ice patches on moraine (pale streaks) -->
+            <path fill="#b8c8d4" opacity="0.22" d="M200,640 C240,630 280,628 320,634 C360,640 380,648 360,652 C340,656 300,658 260,654 C220,650 200,648 200,640 Z"/>
+            <path fill="#b8c8d4" opacity="0.18" d="M700,632 C740,624 780,622 820,628 C860,634 878,642 856,646 C836,650 796,650 756,646 C716,642 700,640 700,632 Z"/>
+            <path fill="#b8c8d4" opacity="0.20" d="M1100,626 C1138,618 1174,616 1208,622 C1242,628 1256,636 1236,640 C1216,644 1178,646 1140,642 C1104,638 1100,634 1100,626 Z"/>
+            <!-- Moraine boulders (dark shapes) -->
+            <ellipse cx="150" cy="635" rx="40" ry="16" fill="#1e1810" opacity="0.8"/>
+            <ellipse cx="420" cy="622" rx="52" ry="20" fill="#201a0e" opacity="0.75"/>
+            <ellipse cx="720" cy="618" rx="44" ry="17" fill="#1e1810" opacity="0.8"/>
+            <ellipse cx="1020" cy="622" rx="48" ry="18" fill="#201a0e" opacity="0.78"/>
+            <ellipse cx="1300" cy="630" rx="36" ry="14" fill="#1e1810" opacity="0.75"/>
           </svg>
         </div>
+
+        <!-- Front: large foreground moraine blocks -->
         <div class="scene__layer scene__layer--front" data-speed="0.36">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V706L220 676L435 736L660 676L885 736L1200 706V800H0Z" fill="#253746"/>
-            <path d="M662.5 800C692.5 720 742.5 680 822.5 680C902.5 680 942.5 740 942.5 800" stroke="#f3f8fc" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.5"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Large irregular boulders -->
+            <path fill="#14100a" d="
+              M0,800 L0,755 L30,730 L75,718 L130,724 L170,744 L210,758 L260,742
+              L310,720 L360,714 L420,722 L480,740 L530,752 L570,736
+              L620,714 L680,708 L750,716 L820,734 L870,748 L910,734
+              L960,712 L1020,706 L1090,714 L1160,730 L1210,744 L1250,730
+              L1300,710 L1360,706 L1410,714 L1440,720 L1440,800 Z"/>
           </svg>
         </div>
+
         <div class="scene__content">
           <div class="scene__card scene__card--light">
-            <p class="scene__tag">Stage 04 · Snowline</p>
-            <h2>The Cold Opens</h2>
-            <p class="scene__subheading">The world turns pale, bright, and precise.</p>
-            <p class="scene__body">Snow catches the light and every edge feels sharper than before.</p>
+            <p class="scene__tag">Stage 04 · Lobuche · Khumbu Glacier</p>
+            <h2>The Great Wall</h2>
+            <p class="scene__subheading">Nuptse fills the sky from edge to edge.</p>
+            <p class="scene__body">The Khumbu glacier moraine stretches in every direction — a rubble field of stones carried down from the highest peaks on earth.</p>
             <div class="scene__meta">
-              <span class="scene__stat"><strong>3,200</strong>m</span>
-              <span class="scene__stat"><strong>Temp</strong> −4°C</span>
+              <span class="scene__stat"><strong>4,940</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> −8 °C</span>
+              <span class="scene__stat"><strong>Day</strong> 8</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── Scene 5: Night ──────────────────────────────── -->
+      <!-- ══════════════════════════════════════════════════
+           SCENE 5 · EVEREST BASE CAMP  (5,364 m)
+           Yellow tents on the glacier. Khumbu icefall above.
+           Milky Way blazing overhead. Below -15°C at night.
+      ══════════════════════════════════════════════════ -->
       <section class="scene scene--night" id="night">
+
+        <!-- Back: star-filled sky + dark peak silhouettes -->
         <div class="scene__layer scene__layer--back" data-speed="0.09">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="1200" height="800" fill="#07131e"/>
-            <circle cx="900" cy="180" r="80" fill="#f5c76a" opacity="0.75"/>
-            <!-- Stars -->
-            <circle cx="100" cy="60"  r="1.5" fill="#fff" opacity="0.7"/>
-            <circle cx="230" cy="90"  r="1"   fill="#fff" opacity="0.6"/>
-            <circle cx="370" cy="40"  r="1.5" fill="#fff" opacity="0.8"/>
-            <circle cx="520" cy="110" r="1"   fill="#fff" opacity="0.5"/>
-            <circle cx="650" cy="70"  r="2"   fill="#fff" opacity="0.7"/>
-            <circle cx="760" cy="30"  r="1"   fill="#fff" opacity="0.9"/>
-            <circle cx="400" cy="170" r="1.5" fill="#fff" opacity="0.6"/>
-            <circle cx="160" cy="200" r="1"   fill="#fff" opacity="0.5"/>
-            <circle cx="580" cy="200" r="1.5" fill="#fff" opacity="0.8"/>
-            <path d="M0 800V560L160 500L310 560L500 440L740 560L960 470L1200 530V800H0Z" fill="#1b2e3d"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Stars (Milky Way band suggested) -->
+            <g fill="#ffffff">
+              <!-- Milky Way core (brighter cluster diagonally) -->
+              <circle cx="200"  cy="80"  r="1.4" opacity="0.90"/>
+              <circle cx="240"  cy="60"  r="1.0" opacity="0.75"/>
+              <circle cx="280"  cy="48"  r="1.6" opacity="0.85"/>
+              <circle cx="320"  cy="70"  r="0.8" opacity="0.65"/>
+              <circle cx="360"  cy="44"  r="1.2" opacity="0.80"/>
+              <circle cx="400"  cy="58"  r="1.8" opacity="0.90"/>
+              <circle cx="440"  cy="36"  r="1.0" opacity="0.70"/>
+              <circle cx="480"  cy="52"  r="1.4" opacity="0.85"/>
+              <circle cx="520"  cy="68"  r="0.8" opacity="0.60"/>
+              <circle cx="560"  cy="40"  r="1.6" opacity="0.88"/>
+              <circle cx="600"  cy="56"  r="1.2" opacity="0.75"/>
+              <circle cx="640"  cy="32"  r="1.0" opacity="0.80"/>
+              <circle cx="680"  cy="62"  r="1.8" opacity="0.92"/>
+              <circle cx="720"  cy="44"  r="1.4" opacity="0.78"/>
+              <circle cx="760"  cy="28"  r="1.0" opacity="0.70"/>
+              <circle cx="800"  cy="52"  r="1.6" opacity="0.85"/>
+              <circle cx="840"  cy="38"  r="0.8" opacity="0.65"/>
+              <circle cx="880"  cy="60"  r="1.2" opacity="0.80"/>
+              <circle cx="920"  cy="42"  r="1.8" opacity="0.88"/>
+              <circle cx="960"  cy="26"  r="1.0" opacity="0.72"/>
+              <circle cx="1000" cy="54"  r="1.4" opacity="0.82"/>
+              <circle cx="1040" cy="36"  r="0.8" opacity="0.68"/>
+              <circle cx="1080" cy="62"  r="1.6" opacity="0.86"/>
+              <circle cx="1120" cy="40"  r="1.2" opacity="0.75"/>
+              <circle cx="1160" cy="22"  r="1.0" opacity="0.80"/>
+              <circle cx="1200" cy="50"  r="1.8" opacity="0.90"/>
+              <circle cx="1240" cy="34"  r="1.4" opacity="0.76"/>
+              <circle cx="1280" cy="58"  r="0.8" opacity="0.65"/>
+              <circle cx="1320" cy="38"  r="1.6" opacity="0.84"/>
+              <circle cx="1360" cy="68"  r="1.0" opacity="0.72"/>
+              <circle cx="1400" cy="46"  r="1.2" opacity="0.78"/>
+              <!-- Scattered field stars -->
+              <circle cx="120"  cy="110" r="1.0" opacity="0.60"/>
+              <circle cx="160"  cy="140" r="1.4" opacity="0.70"/>
+              <circle cx="310"  cy="120" r="0.8" opacity="0.55"/>
+              <circle cx="460"  cy="100" r="1.2" opacity="0.65"/>
+              <circle cx="550"  cy="130" r="1.0" opacity="0.60"/>
+              <circle cx="700"  cy="110" r="1.6" opacity="0.72"/>
+              <circle cx="820"  cy="140" r="0.8" opacity="0.58"/>
+              <circle cx="950"  cy="100" r="1.4" opacity="0.68"/>
+              <circle cx="1050" cy="130" r="1.0" opacity="0.62"/>
+              <circle cx="1180" cy="108" r="1.2" opacity="0.70"/>
+              <circle cx="1300" cy="120" r="0.8" opacity="0.56"/>
+              <circle cx="1420" cy="90"  r="1.6" opacity="0.74"/>
+              <!-- Jupiter/bright stars -->
+              <circle cx="350"  cy="85"  r="2.2" opacity="0.95"/>
+              <circle cx="900"  cy="48"  r="2.4" opacity="0.98"/>
+              <circle cx="1260" cy="76"  r="2.0" opacity="0.90"/>
+            </g>
+            <!-- Dark Khumbu Icefall silhouette looming above -->
+            <path fill="#030608" d="
+              M0,800 L0,460 L30,448 L55,434 L75,418 L90,398 L102,376
+              L112,354 L122,338 L135,330 L150,330 L168,336 L190,350
+              L216,372 L244,398 L274,424 L308,448 L346,468 L388,484
+              L434,496 L484,504 L538,508 L596,508 L658,504 L722,496
+              L790,484 L860,468 L932,448 L1006,426 L1080,402 L1150,378
+              L1214,356 L1270,338 L1318,330 L1356,332 L1384,344
+              L1406,362 L1424,386 L1438,414 L1440,420 L1440,800 Z"/>
           </svg>
         </div>
-        <div class="scene__layer scene__layer--mid" data-speed="0.2">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V650L200 580L320 640L540 500L740 620L980 540L1200 600V800H0Z" fill="#23384d"/>
+
+        <!-- Mid: glacier surface (dark blue-grey ice) -->
+        <div class="scene__layer scene__layer--mid" data-speed="0.20">
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s5-glacier" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#162030"/>
+                <stop offset="100%" stop-color="#080c12"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#s5-glacier)" d="
+              M0,800 L0,640 C80,628 170,618 270,622 C370,626 480,614 600,618
+              C720,622 840,612 960,618 C1080,624 1200,614 1320,618
+              C1390,621 1430,628 1440,632 L1440,800 Z"/>
+            <!-- Ice serac cracks (lighter blue lines) -->
+            <path stroke="#1e3448" stroke-width="1.2" fill="none" opacity="0.5"
+              d="M200,640 C240,634 260,638 280,632 C300,626 320,628 340,636"/>
+            <path stroke="#1e3448" stroke-width="1.0" fill="none" opacity="0.4"
+              d="M600,630 C640,624 660,628 680,622 C700,618 720,620 740,626"/>
+            <path stroke="#1e3448" stroke-width="1.2" fill="none" opacity="0.45"
+              d="M1000,626 C1040,620 1060,624 1080,618 C1100,614 1120,616 1140,622"/>
           </svg>
         </div>
+
+        <!-- Front: EBC camp — tent warm glow on glacier -->
         <div class="scene__layer scene__layer--front" data-speed="0.34">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V706L220 676L435 736L660 676L885 736L1200 706V800H0Z" fill="#02060b"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Warm glow pooling on glacier from tents -->
+            <ellipse cx="520"  cy="668" rx="120" ry="30" fill="#d06018" opacity="0.18"/>
+            <ellipse cx="760"  cy="660" rx="90"  ry="22" fill="#c85818" opacity="0.14"/>
+            <ellipse cx="980"  cy="664" rx="100" ry="25" fill="#d06018" opacity="0.16"/>
+            <!-- Tent silhouettes (classic ridge tent shape) -->
+            <g fill="#1e0e04" opacity="0.9">
+              <polygon points="460,672 490,648 520,672"/>
+              <polygon points="490,672 518,650 546,672"/>
+              <polygon points="540,672 568,652 596,672"/>
+              <polygon points="700,664 730,642 760,664"/>
+              <polygon points="730,664 758,644 786,664"/>
+              <polygon points="900,668 930,646 960,668"/>
+              <polygon points="940,666 968,646 996,666"/>
+              <polygon points="1000,667 1028,648 1056,667"/>
+            </g>
+            <!-- Tent warm glow (lit from inside) -->
+            <ellipse cx="490"  cy="660" rx="22" ry="10" fill="#e07020" opacity="0.22"/>
+            <ellipse cx="730"  cy="653" rx="22" ry="10" fill="#e07020" opacity="0.20"/>
+            <ellipse cx="930"  cy="657" rx="22" ry="10" fill="#e07020" opacity="0.22"/>
+            <!-- Near dark foreground ground -->
+            <path fill="#050810" d="
+              M0,800 L0,745 C80,735 180,726 300,730 C420,734 550,724 690,728
+              C830,732 980,724 1130,728 C1280,732 1380,736 1440,740 L1440,800 Z"/>
           </svg>
         </div>
+
         <div class="scene__content">
           <div class="scene__card">
-            <p class="scene__tag">Stage 05 · Night Camp</p>
+            <p class="scene__tag">Stage 05 · Everest Base Camp · Night</p>
             <h2>Under the Stars</h2>
-            <p class="scene__subheading">The mountain becomes quiet and immense.</p>
-            <p class="scene__body">Campfire glow, cold air, and a sky full of light make the world feel close and far at once.</p>
+            <p class="scene__subheading">5,364 metres. The mountain breathes around you.</p>
+            <p class="scene__body">Tent walls glow orange against the glacier. The Khumbu Icefall crackles and groans above. The Milky Way is close enough to touch.</p>
             <div class="scene__meta">
-              <span class="scene__stat"><strong>3,900</strong>m</span>
-              <span class="scene__stat"><strong>Temp</strong> −11°C</span>
+              <span class="scene__stat"><strong>5,364</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> −15 °C</span>
+              <span class="scene__stat"><strong>Day</strong> 10</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── Scene 6: Summit ─────────────────────────────── -->
+      <!-- ══════════════════════════════════════════════════
+           SCENE 6 · KALA PATTHAR  (5,644 m)
+           Golden sunrise ignites Everest, Nuptse, Lhotse.
+           The classic view. Prayer flags in the wind.
+      ══════════════════════════════════════════════════ -->
       <section class="scene scene--summit" id="summit">
+
+        <!-- Back: dramatic sunrise sky + Everest-Nuptse-Lhotse silhouette -->
         <div class="scene__layer scene__layer--back" data-speed="0.08">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="1200" height="800" fill="#ffce76"/>
-            <path d="M0 560L200 460L360 530L520 400L690 520L860 430L1200 520V800H0V560Z" fill="#c6802a" opacity="0.8"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s6-sunrise" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#4a1a50"/>   <!-- deep purple -->
+                <stop offset="20%"  stop-color="#8a2a30"/>   <!-- dark red-purple -->
+                <stop offset="42%"  stop-color="#d44a14"/>   <!-- burnt orange -->
+                <stop offset="62%"  stop-color="#e88020"/>   <!-- amber -->
+                <stop offset="78%"  stop-color="#f0b040"/>   <!-- gold -->
+                <stop offset="100%" stop-color="#fad060"/>   <!-- pale gold at horizon -->
+              </linearGradient>
+              <!-- Sun glow near horizon -->
+              <radialGradient id="s6-sun" cx="30%" cy="80%" r="40%">
+                <stop offset="0%"   stop-color="#fff0a0" stop-opacity="0.5"/>
+                <stop offset="60%"  stop-color="#f0b040" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#e88020" stop-opacity="0.0"/>
+              </radialGradient>
+            </defs>
+            <!-- Sunrise sky fill -->
+            <rect width="1440" height="800" fill="url(#s6-sunrise)"/>
+            <!-- Sun glow radial -->
+            <rect width="1440" height="800" fill="url(#s6-sun)"/>
+            <!-- Everest summit pyramid (highest point ~x=480) -->
+            <path fill="#160c10" d="
+              M0,800 L0,560 L40,548 L80,532 L120,514 L158,492 L192,466
+              L220,436 L244,404 L262,370 L275,336 L284,302 L289,272
+              L292,246 L293,224 L294,206 L295,190 L295,178 L296,168
+              L296,160 L297,154 L298,150 L299,148 L300,148 L301,150
+              L303,156 L306,166 L311,180 L318,198 L328,222 L342,250
+              L360,282 L382,318 L410,356 L444,396 L484,436 L530,474
+              L582,508 L638,538 L698,562 L762,582 L830,596 L902,606
+              L978,612 L1058,614 L1140,612 L1224,606 L1308,596 L1390,582
+              L1440,570 L1440,800 Z"/>
+            <!-- Nuptse (right of Everest, broad shoulder) -->
+            <path fill="#120a0c" d="
+              M580,800 L580,618 L640,608 L704,594 L768,576 L830,554
+              L888,528 L940,498 L984,466 L1018,432 L1042,398 L1056,368
+              L1060,346 L1060,332 L1061,326 L1063,326 L1066,332 L1072,346
+              L1082,368 L1096,398 L1116,432 L1142,468 L1174,504 L1212,538
+              L1256,568 L1304,594 L1356,614 L1412,628 L1440,634
+              L1440,800 Z" opacity="0.92"/>
           </svg>
         </div>
-        <div class="scene__layer scene__layer--mid" data-speed="0.2">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 630L180 540L300 590L470 480L640 600L830 490L1200 610V800H0V630Z" fill="#4a2f14"/>
+
+        <!-- Mid: prayer flag ridge silhouette -->
+        <div class="scene__layer scene__layer--mid" data-speed="0.20">
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Foreground ridge -->
+            <path fill="#0e0806" d="
+              M0,800 L0,680 C60,668 140,658 240,662 C340,666 460,654 600,658
+              C740,662 880,650 1020,656 C1160,662 1300,654 1440,658 L1440,800 Z"/>
+            <!-- Prayer flag poles on ridge -->
+            <g stroke="#1a1008" stroke-width="2" opacity="0.8">
+              <line x1="200"  y1="688" x2="200"  y2="640"/>
+              <line x1="380"  y1="676" x2="380"  y2="624"/>
+              <line x1="560"  y1="670" x2="560"  y2="616"/>
+              <line x1="740"  y1="666" x2="740"  y2="612"/>
+              <line x1="920"  y1="668" x2="920"  y2="614"/>
+              <line x1="1100" y1="672" x2="1100" y2="618"/>
+              <line x1="1280" y1="678" x2="1280" y2="626"/>
+            </g>
+            <!-- Prayer flag strings connecting poles -->
+            <polyline points="200,648 380,636 560,630 740,626 920,628 1100,632 1280,638"
+              stroke="#2a1808" stroke-width="1.5" fill="none" opacity="0.65"/>
+            <!-- Flag panels (lung ta colours: red, white, blue, yellow, green) -->
+            <g opacity="0.60">
+              <rect x="210"  y="644" width="18" height="12" fill="#c03020"/>
+              <rect x="244"  y="641" width="18" height="12" fill="#e8e8e0"/>
+              <rect x="278"  y="639" width="18" height="12" fill="#2850a8"/>
+              <rect x="312"  y="637" width="18" height="12" fill="#d8a820"/>
+              <rect x="346"  y="636" width="18" height="12" fill="#208040"/>
+              <rect x="400"  y="634" width="18" height="12" fill="#c03020"/>
+              <rect x="434"  y="632" width="18" height="12" fill="#e8e8e0"/>
+              <rect x="468"  y="631" width="18" height="12" fill="#2850a8"/>
+              <rect x="502"  y="630" width="18" height="12" fill="#d8a820"/>
+              <rect x="536"  y="630" width="18" height="12" fill="#208040"/>
+              <rect x="588"  y="629" width="18" height="12" fill="#c03020"/>
+              <rect x="622"  y="629" width="18" height="12" fill="#e8e8e0"/>
+              <rect x="656"  y="628" width="18" height="12" fill="#2850a8"/>
+              <rect x="690"  y="627" width="18" height="12" fill="#d8a820"/>
+            </g>
           </svg>
         </div>
+
+        <!-- Front: rocky Kala Patthar summit boulders -->
         <div class="scene__layer scene__layer--front" data-speed="0.34">
-          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 800V706C80 676 146.5 676 220 706C293.5 736 356.5 736 435 706C513.5 676 580 676 660 706C740 736 813.5 736 885 706C956.5 676 1035 676 1200 706V800H0Z" fill="#16110d"/>
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Summit rock field -->
+            <path fill="#0c0804" d="
+              M0,800 L0,754 L24,732 L58,716 L102,708 L150,710 L194,720
+              L238,732 L278,736 L316,722 L358,706 L404,700 L454,706
+              L506,718 L556,730 L600,734 L640,720 L684,704 L732,698
+              L784,704 L840,716 L896,728 L944,732 L986,718 L1032,702
+              L1082,696 L1136,702 L1192,714 L1248,726 L1300,730
+              L1348,718 L1394,704 L1440,700 L1440,800 Z"/>
+            <!-- Sun catching rock faces (warm golden edge light) -->
+            <path fill="#c87820" opacity="0.12" d="
+              M100,754 L58,716 L102,708 L150,710 L140,754 Z"/>
+            <path fill="#c87820" opacity="0.10" d="
+              M700,730 L684,704 L732,698 L784,704 L760,730 Z"/>
+            <path fill="#c87820" opacity="0.12" d="
+              M1196,726 L1192,714 L1248,726 L1240,746 Z"/>
           </svg>
         </div>
+
         <div class="scene__content">
           <div class="scene__card scene__card--summit">
-            <p class="scene__tag">Stage 06 · Summit</p>
+            <p class="scene__tag">Stage 06 · Kala Patthar · Khumbu</p>
             <h2>The Summit</h2>
-            <p class="scene__subheading">Everything below becomes a map.</p>
-            <p class="scene__body">The final view feels earned — a wide, bright horizon and the reward of reaching the top.</p>
+            <p class="scene__subheading">Sunrise at 5,644 metres. Everest ignites.</p>
+            <p class="scene__body">Gold floods the south face of Everest. Nuptse's ridge glows amber. The prayer flags tear and snap in the wind. Below, everything is cloud.</p>
             <div class="scene__meta scene__meta--summit">
-              <span class="scene__stat"><strong>4,350</strong>m</span>
-              <span class="scene__stat"><strong>Temp</strong> −18°C</span>
-              <span class="scene__stat"><strong>Wind</strong> 42 km/h</span>
+              <span class="scene__stat"><strong>5,644</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> −20 °C</span>
+              <span class="scene__stat"><strong>Wind</strong> 55 km/h</span>
             </div>
           </div>
         </div>
@@ -309,12 +820,9 @@
 
     </main>
 
-    <!-- ══════════════════════════════════════════════════════
-         FOOTER
-    ══════════════════════════════════════════════════════ -->
     <footer class="footer">
-      <p class="footer__credit">Built with care &amp; scroll magic</p>
-      <a href="#top" class="footer__back">↑ Back to top</a>
+      <p class="footer__credit">Inspired by the Everest Base Camp Trek, Khumbu, Nepal</p>
+      <a href="#top" class="footer__back">↑ Back to start</a>
     </footer>
 
     <script src="js/main.js"></script>

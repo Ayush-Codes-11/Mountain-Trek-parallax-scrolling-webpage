@@ -518,13 +518,19 @@ img,svg { display:block; max-width:100%; }
 .scene__card--summit .scene__stat { color:rgba(240,236,228,0.55); }
 .scene__card--summit .scene__stat strong { color:#ffd980; }
 
-/* Scene backgrounds */
-.scene--forest    { background:linear-gradient(180deg,#4d6c3f 0%,#2e4b24 42%,#16220f 100%); }
-.scene--waterfall { background:linear-gradient(180deg,#9bd2de 0%,#5f8a96 45%,#2f4349 100%); }
-.scene--cliff     { background:linear-gradient(180deg,#6d7681 0%,#3f4852 42%,#201d23 100%); }
-.scene--snow      { background:linear-gradient(180deg,#e1edf4 0%,#98b0c2 44%,#4c6173 100%); }
-.scene--night     { background:linear-gradient(180deg,#07131e 0%,#14253b 42%,#050608 100%); }
-.scene--summit    { background:linear-gradient(180deg,#ffce76 0%,#c98129 40%,#2d170c 100%); }
+/* Scene backgrounds — Khumbu region photographic palette */
+/* Forest: warm morning mist in a narrow river valley */
+.scene--forest    { background:linear-gradient(180deg,#4e7080 0%,#3a5a48 32%,#1e3820 62%,#0c1a10 100%); }
+/* Namche: high-altitude clear blue, glacial turquoise canyon */
+.scene--waterfall { background:linear-gradient(180deg,#2a4e6e 0%,#3e6278 28%,#486472 55%,#1c2a30 100%); }
+/* Tengboche: deep clear blue sky above treeline */
+.scene--cliff     { background:linear-gradient(180deg,#1c3654 0%,#2e4e6a 22%,#4e5e50 55%,#262c18 100%); }
+/* Lobuche: cold steel-blue, high-altitude grey */
+.scene--snow      { background:linear-gradient(180deg,#243444 0%,#364c5e 24%,#505856 55%,#2e2820 100%); }
+/* EBC night: near-black, deep navy starfield */
+.scene--night     { background:linear-gradient(180deg,#03060e 0%,#060a18 38%,#080c1c 68%,#040608 100%); }
+/* Kala Patthar: purple-orange-gold sunrise drama */
+.scene--summit    { background:linear-gradient(180deg,#3c1442 0%,#821e28 16%,#c84010 36%,#e07820 55%,#962010 74%,#160804 100%); }
 
 /* ── 8. Footer ───────────────────────────────────────────────── */
 .footer {
