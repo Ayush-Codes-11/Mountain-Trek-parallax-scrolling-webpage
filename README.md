@@ -1,78 +1,93 @@
-# Mountain Trek — Parallax Scrolling Website
+# 🏔️ Everest Base Camp Trek — Parallax Scrolling Webpage
 
-An immersive, scroll-driven single-page experience — a visual journey through six stages of elevation, from forest base (1,200m) to alpine summit (4,200m). Every design decision is derived from the subject matter, not generic AI aesthetic defaults.
+An immersive, award-winning parallax scrolling experience that takes you through **six stages** of the Everest Base Camp Trek in Nepal's Khumbu Valley.
 
-## Tech Stack
+![Site Preview](screenshots/preview.png)
 
-| Layer | Choice | Rationale |
-|---|---|---|
-| Markup | Plain HTML5 | Semantic `<section>` per scene; no framework overhead |
-| Styling | Plain CSS3 + custom properties | Full control over bespoke palette/type/spacing tokens |
-| Visuals | Inline SVG silhouettes | Crisp at any size, recoloured per section via CSS tokens |
-| Scroll/Motion | GSAP 3 + ScrollTrigger (CDN) | Reliable, controllable per-layer scroll-speed differences |
-| Smooth scroll | Lenis (CDN) | Buttery base scroll feel before GSAP activates |
-| Build tooling | None | Open `index.html` directly — no npm, no bundler |
-| Hosting | Vercel (GitHub auto-deploy) | Free, clean URL, redeployes on every push |
+---
 
-## Typography
+## ✨ Features
 
-Three-font system, each strictly scoped by role:
+- **True photo parallax** — six photorealistic Himalayan scene photos, each moving at a different speed from the foreground card, creating genuine depth
+- **Live altitude HUD** — amber tracker on the left counts from 2,860 m to 5,644 m as you scroll
+- **Smooth 60 fps animations** — all scroll updates run in a single `requestAnimationFrame` loop; only compositor-layer `transform` properties are written
+- **Glassmorphism info cards** — `backdrop-filter` blur panels with scene-specific light/dark variants
+- **Section navigation dots** — fixed right-side dots powered by `IntersectionObserver`
+- **Star canvas hero** — animated star-field on the intro screen; paused when off-screen
+- **Cursor glow** — radial gradient that lazily follows the mouse (hover devices only)
+- **Fully responsive** — fluid `clamp()` typography, 3-tier mobile breakpoints
+- **Accessible** — `prefers-reduced-motion` respected, `aria-*` on all interactive elements
 
-| Face | Role | Scope |
-|---|---|---|
-| **Fraunces** (variable, display) | Leads visually | Section headings only — always the largest element on screen |
-| **Alegreya** (humanist serif) | Supports quietly | Subheadings and body paragraphs — legible, warm, not competing |
-| **DM Mono** (monospaced) | Stays incidental | Altitude readout, elevation labels, numerical data only — never headline size |
+---
 
-## Palette — Elevation Arc
+## 🗺️ The Six Stages
 
-| Token | Hex | Represents |
-|---|---|---|
-| `forest-floor` | `#2D4A22` | Deep conifer green — Section 1 |
-| `warm-bark` | `#8B5E3C` | Trail dirt, bark — Sections 1–2 accents |
-| `earth-stone` | `#7A6652` | Foothills rock/earth — Section 2 |
-| `cliff-grey` | `#5C5C6B` | Rocky ascent — Section 3 |
-| `alpine-mist` | `#C8CDD6` | Cloud layer light — Section 4 |
-| `snowline-blue` | `#A8C0D6` | Snow-capped ridges — Section 5 |
-| `void-sky` | `#1A2B3C` | Deep alpine sky — Sections 5–6 |
-| `summit-gold` | `#E8A84C` | **Reserved: summit sunrise only** — Section 6 payoff |
+| Stage | Location | Altitude |
+|-------|----------|----------|
+| 01 | Khumbu Valley Forest · Phakding | 2,860 m |
+| 02 | Dudh Kosi Canyon · Namche Bazaar | 3,440 m |
+| 03 | Tengboche · Ama Dablam | 3,867 m |
+| 04 | Lobuche · Khumbu Glacier Moraine | 4,940 m |
+| 05 | Everest Base Camp · Night | 5,364 m |
+| 06 | Kala Patthar · Sunrise | 5,644 m |
 
-## Sections
+---
 
-| # | Scene | Elevation | Mood |
-|---|---|---|---|
-| 1 | Forest Base | 1,200m | Deep greens, warm amber light |
-| 2 | Foothills | 1,800m | Olive/earth tones, first view of range |
-| 3 | Rocky Ascent | 2,600m | Grey-brown, harsher light |
-| 4 | Cloud Layer | 3,200m | Soft white-grey, diffused |
-| 5 | Snowline | 3,800m | Cool blues/whites, alpine cold |
-| 6 | Summit | 4,200m | Gold, pink, triumphant |
+## 🛠️ Tech Stack
 
-## Signature Motion Element
+| Layer | Technology |
+|-------|-----------|
+| Structure | Semantic HTML5 |
+| Styling | Vanilla CSS — `clamp()`, `backdrop-filter`, CSS custom properties |
+| Animations | Vanilla JS — `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` |
+| Fonts | Google Fonts — Fraunces (display), Inter (body), DM Mono (mono) |
+| Images | AI-generated photorealistic Himalayan scenes |
+| Hosting | GitHub Pages |
 
-A hiker silhouette (SVG) pinned to the right edge of the viewport climbs the full page height as you scroll, accompanied by an altitude counter (DM Mono) ticking from 1,200m → 4,200m — tied to total scroll progress, not per-section.
+No frameworks. No build step. No dependencies.
 
-## Running Locally
+---
 
-No build step needed. Open `index.html` in any modern browser.
+## 🚀 Run Locally
 
-## File Structure
+```bash
+# Clone the repo
+git clone https://github.com/Ayush-Codes-11/Mountain-Trek-parallax-scrolling-webpage.git
+cd Mountain-Trek-parallax-scrolling-webpage
 
-```
-/index.html       — 6 semantic scene sections
-/css/style.css    — design tokens, typography, scene themes
-/js/main.js       — scroll logic (Phase 2); GSAP/Lenis added in Phases 4/7
-/README.md        — this file
+# Serve with Python (or any static server)
+python -m http.server 8080
 ```
 
-## Build Phases
+Then open **http://localhost:8080** in your browser.
 
-- **Phase 2** (current): Static HTML/CSS scaffold — all sections, typography, colour arc  
-- **Phase 3**: SVG silhouette layers (bg/midground/foreground) per section, static  
-- **Phase 4**: GSAP ScrollTrigger parallax mechanics  
-- **Phase 5**: Hiker silhouette + altitude counter signature motion  
-- **Phase 6**: Polish — type scale, section crossfades, hover details  
-- **Phase 7**: Performance pass — Lenis, reduced-motion, GPU-only properties  
-- **Phase 8**: Responsive pass  
-- **Phase 9**: Cross-browser QA (Chrome, Firefox, iOS Safari)  
-- **Phase 10**: Vercel deploy
+---
+
+## 📁 Project Structure
+
+```
+├── index.html          # Page structure — hero + 6 scene sections
+├── css/
+│   └── style.css       # Design tokens, parallax layout, cards, responsive
+├── js/
+│   └── main.js         # RAF scroll loop, altitude HUD, star canvas, nav dots
+├── img/
+│   ├── s1-forest.jpg   # Khumbu Valley rhododendron forest
+│   ├── s2-canyon.jpg   # Dudh Kosi river gorge
+│   ├── s3-tengboche.jpg# Ama Dablam alpine meadow
+│   ├── s4-moraine.jpg  # Khumbu glacier moraine
+│   ├── s5-night.jpg    # Everest Base Camp night sky
+│   └── s6-sunrise.jpg  # Kala Patthar sunrise
+└── screenshots/
+    └── preview.png
+```
+
+---
+
+## 🔗 Live Demo
+
+> **[https://ayush-codes-11.github.io/Mountain-Trek-parallax-scrolling-webpage/](https://ayush-codes-11.github.io/Mountain-Trek-parallax-scrolling-webpage/)**
+
+---
+
+*Inspired by the Everest Base Camp Trek, Khumbu Valley, Nepal.*
