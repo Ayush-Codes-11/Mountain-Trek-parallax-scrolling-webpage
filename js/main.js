@@ -184,7 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let scrollY   = window.scrollY;
   let isTicking = false;
   let vh        = window.innerHeight;
-  let maxScroll = document.documentElement.scrollHeight - vh;
+  let maxScroll = Math.max(0, document.documentElement.scrollHeight - vh);
+
+  /** Recompute viewport + scroll metrics — called on load, resize, and
+   *  whenever the document changes height (e.g. lazy images finishing). */
+  function recalcMetrics() {
+    vh        = window.innerHeight;
+    maxScroll = Math.max(0, document.documentElement.scrollHeight - vh);
+    scrollY   = window.scrollY;
+  }
 
   /* ═══════════════════════════════════════════════════════════
      6. UTILITIES
@@ -230,6 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ═══════════════════════════════════════════════════════════
      9. MAIN UPDATE — one rAF per scroll event
      All reads happen before all writes to avoid forced layouts.
+     progress = 0 when page hasn't scrolled (or maxScroll = 0);
+     clamped to [0,1] so HUD always shows a valid altitude.
   ═══════════════════════════════════════════════════════════ */
   function updateDOM() {
     const progress = maxScroll > 0 ? clamp(scrollY / maxScroll, 0, 1) : 0;
@@ -270,6 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ═══════════════════════════════════════════════════════════
      10. EVENT LISTENERS
   ═══════════════════════════════════════════════════════════ */
+
+  // Scroll — throttled to one rAF per event burst
   window.addEventListener('scroll', () => {
     scrollY = window.scrollY;
     if (!isTicking) {
@@ -278,18 +290,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  window.addEventListener('resize', (() => {
-    let t;
-    return () => {
-      clearTimeout(t);
-      t = setTimeout(() => {
-        vh        = window.innerHeight;
-        maxScroll = document.documentElement.scrollHeight - vh;
-        scrollY   = window.scrollY;
-        requestAnimationFrame(updateDOM);
-      }, 150);
-    };
-  })(), { passive: true });
+  // Resize — debounced 150 ms
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      recalcMetrics();
+      requestAnimationFrame(updateDOM);
+    }, 150);
+  }, { passive: true });
+
+  // Window load — fires AFTER all images (including lazy ones) have loaded
+  // and the browser has computed the final document height.
+  // This is the primary fix for maxScroll being 0 at DOMContentLoaded.
+  window.addEventListener('load', () => {
+    recalcMetrics();
+    requestAnimationFrame(updateDOM);
+  });
+
+  // ResizeObserver on documentElement — catches any future height changes
+  // (e.g. web-fonts shifting layout, images loading out-of-order).
+  if ('ResizeObserver' in window) {
+    let roTimer;
+    const pageRO = new ResizeObserver(() => {
+      clearTimeout(roTimer);
+      roTimer = setTimeout(() => {
+        recalcMetrics();
+        // No rAF here — just update metrics; next scroll event will redraw.
+      }, 100);
+    });
+    pageRO.observe(document.documentElement);
+  }
 
   /* ═══════════════════════════════════════════════════════════
      11. CTA HOVER PULSE (pointer devices only)

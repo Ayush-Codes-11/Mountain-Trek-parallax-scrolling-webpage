@@ -32,6 +32,28 @@
       <a href="#summit"    class="nav-dot" data-label="Kala Patthar"  aria-label="Summit"></a>
     </nav>
 
+    <!-- Altitude HUD — fixed left side; kept as a direct body child
+         so it is never clipped by hero's overflow:hidden -->
+    <aside class="alt-hud" id="alt-hud" aria-label="Current altitude">
+      <span class="alt-hud__label">ALT</span>
+      <div class="alt-hud__track" role="progressbar" aria-valuemin="2860" aria-valuemax="5644" aria-valuenow="2860">
+        <div class="alt-hud__fill" id="alt-fill"></div>
+        <div class="alt-hud__marker" id="alt-marker">
+          <svg class="alt-hud__hiker" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+            <circle cx="13" cy="4"  r="3.2"/>
+            <rect   x="5"  y="8"  width="5"   height="8"  rx="1"/>
+            <rect   x="9"  y="8"  width="4.5" height="8.5"/>
+            <polygon points="9.5,16.5 13,16.5 11,28 8,28"/>
+            <polygon points="11,16.5 14,16.5 15,28 12,28"/>
+            <rect   x="17.5" y="11" width="1.6" height="17" rx="0.8" transform="rotate(12 18.3 19.5)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="alt-hud__readout">
+        <span id="alt-value">2,860</span><span class="alt-hud__unit">m</span>
+      </div>
+    </aside>
+
     <!-- ══ HERO ══════════════════════════════════════════════════ -->
     <header class="hero" id="top">
       <canvas class="hero__stars" id="hero-stars" aria-hidden="true"></canvas>
@@ -60,25 +82,6 @@
         </div>
       </div>
 
-      <aside class="alt-hud" id="alt-hud" aria-label="Current altitude">
-        <span class="alt-hud__label">ALT</span>
-        <div class="alt-hud__track" role="progressbar" aria-valuemin="2860" aria-valuemax="5644" aria-valuenow="2860">
-          <div class="alt-hud__fill" id="alt-fill"></div>
-          <div class="alt-hud__marker" id="alt-marker">
-            <svg class="alt-hud__hiker" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
-              <circle cx="13" cy="4"  r="3.2"/>
-              <rect   x="5"  y="8"  width="5"   height="8"  rx="1"/>
-              <rect   x="9"  y="8"  width="4.5" height="8.5"/>
-              <polygon points="9.5,16.5 13,16.5 11,28 8,28"/>
-              <polygon points="11,16.5 14,16.5 15,28 12,28"/>
-              <rect   x="17.5" y="11" width="1.6" height="17" rx="0.8" transform="rotate(12 18.3 19.5)"/>
-            </svg>
-          </div>
-        </div>
-        <div class="alt-hud__readout">
-          <span id="alt-value">2,860</span><span class="alt-hud__unit">m</span>
-        </div>
-      </aside>
 
       <div class="hero__glow hero__glow--amber" aria-hidden="true"></div>
       <div class="hero__glow hero__glow--blue"  aria-hidden="true"></div>
