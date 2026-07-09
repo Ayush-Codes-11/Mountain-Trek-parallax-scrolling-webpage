@@ -363,61 +363,6 @@ img { display: block; max-width: 100%; }
     rgba(20,8,4,0.45) 68%, rgba(10,4,2,0.80) 100%);
 }
 
-/* ── 8. Trekker figure ───────────────────────────────────────── */
-/*
-  Positioning: absolute, bottom of scene (above info card).
-  JS drives `left` as a %-value (8 → 68%) as the section scrolls
-  through the viewport, creating a "walking across" effect.
-  will-change:transform covers the JS-driven translateY bob.
-*/
-.scene__trekker {
-  position: absolute;
-  bottom: clamp(7rem, 14vh, 12rem);
-  left: 8%;
-  z-index: 3;
-  will-change: transform;
-  filter: drop-shadow(2px 8px 16px rgba(0,0,0,0.6));
-}
-
-.trekker__figure {
-  display: block;
-  width: clamp(60px, 8vw, 110px);
-  height: auto;
-  /* mix-blend-mode: multiply — makes the white PNG background transparent
-     over any scene (white × scene colour = scene colour) */
-  mix-blend-mode: multiply;
-  animation: trek-walk 0.9s ease-in-out infinite;
-}
-@keyframes trek-walk {
-  0%   { transform: translateY(0px)   rotate(-1.5deg); }
-  20%  { transform: translateY(-5px)  rotate(0deg);    }
-  40%  { transform: translateY(-2px)  rotate(1.5deg);  }
-  60%  { transform: translateY(-6px)  rotate(0deg);    }
-  80%  { transform: translateY(-3px)  rotate(-1deg);   }
-  100% { transform: translateY(0px)   rotate(-1.5deg); }
-}
-
-/* Scene-specific tint variants (applied via filter after mix-blend-mode) */
-.trekker__figure--cold   { filter: brightness(0.85) saturate(0.7); }
-.trekker__figure--night  { filter: brightness(0.5)  saturate(0.4); mix-blend-mode: normal; }
-.trekker__figure--summit { filter: brightness(1.1)  saturate(1.2) sepia(0.15); }
-
-/* Ground shadow — pulses in sync with walk rhythm */
-.trekker__shadow {
-  width: 70%;
-  height: 8px;
-  margin: -2px auto 0;
-  background: radial-gradient(ellipse, rgba(0,0,0,0.45) 0%, transparent 75%);
-  border-radius: 50%;
-  animation: shadow-pulse 0.9s ease-in-out infinite;
-}
-@keyframes shadow-pulse {
-  0%, 100% { transform: scaleX(1);    opacity: 0.5; }
-  50%       { transform: scaleX(0.7); opacity: 0.3; }
-}
-.trekker__shadow--night  { background: radial-gradient(ellipse, rgba(0,0,0,0.30) 0%, transparent 75%); }
-.trekker__shadow--summit { background: radial-gradient(ellipse, rgba(200,120,40,0.35) 0%, transparent 75%); }
-
 /* ── 9. Scene content & card ─────────────────────────────────── */
 .scene__content {
   position: relative; z-index: 4;
@@ -519,8 +464,6 @@ img { display: block; max-width: 100%; }
   .hero__actions   { flex-direction: column; align-items: stretch; width: 100%; max-width: 18rem; margin: 0 auto; }
   .hero__cta,
   .hero__ghost     { width: 100%; }
-  .trekker__figure { width: 52px; }
-  .scene__trekker  { bottom: 8rem; }
 }
 @media (max-width: 640px) {
   .hero__lead { font-size: 0.92rem; line-height: 1.7; }
@@ -530,7 +473,6 @@ img { display: block; max-width: 100%; }
   .nav-dots        { display: none; }
   .alt-hud         { display: none; }
   .footer          { flex-direction: column; text-align: center; }
-  .scene__trekker  { left: 5%; bottom: 9rem; }
 }
 
 /* ── 12. Reduced motion ──────────────────────────────────────── */
@@ -547,7 +489,5 @@ img { display: block; max-width: 100%; }
   .hero__scroll-hint-arrow               { animation: none; }
   #progress-fill                         { animation: none; }
   .scene__content                        { opacity: 1; transition: none; }
-  .trekker__figure                       { animation: none !important; }
-  .trekker__shadow                       { animation: none !important; }
   .hero__cta:hover, .hero__ghost:hover   { transform: none; }
 }

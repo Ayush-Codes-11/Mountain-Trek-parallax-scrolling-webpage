@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navDots       = Array.from(document.querySelectorAll('.nav-dot'));
   const scenes        = Array.from(document.querySelectorAll('.scene'));
   const sceneContents = Array.from(document.querySelectorAll('.scene__content'));
-  const trekkers      = Array.from(document.querySelectorAll('.scene__trekker'));
+  const trekkers      = [];
 
   // Cache photo layer refs AND their data-speed values once — avoid
   // repeated querySelector + parseFloat inside the hot scroll loop.
@@ -216,27 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     8. TREKKER WALK
-     As a scene scrolls through the viewport (entered / total
-     travel distance), the trekker walks left → right (8%→68%).
-     A sin-wave adds a subtle terrain-bounce on top of the CSS
-     walking animation.
-  ═══════════════════════════════════════════════════════════ */
-  function updateTrekker(trekker, top, height) {
-    // progress: 0 = section bottom enters viewport bottom
-    //           1 = section top exits viewport top
-    const entered  = vh - top;
-    const progress = clamp(entered / (height + vh), 0, 1);
-
-    const xPct = lerp(8, 68, progress);
-    const bobY  = Math.sin(progress * Math.PI * 6) * 3;  // subtle terrain bob
-
-    trekker.style.left      = `${xPct.toFixed(2)}%`;
-    trekker.style.transform = `translateY(${bobY.toFixed(1)}px)`;
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     9. MAIN UPDATE — one rAF per scroll event
+     8. MAIN UPDATE — one rAF per scroll event
      All reads happen before all writes to avoid forced layouts.
      progress = 0 when page hasn't scrolled (or maxScroll = 0);
      clamped to [0,1] so HUD always shows a valid altitude.
@@ -266,11 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!REDUCED && photoLayers[i]) {
         photoLayers[i].style.transform =
           `translate3d(0, ${(-top * photoSpeeds[i]).toFixed(2)}px, 0)`;
-      }
-
-      // Trekker
-      if (trekkers[i]) {
-        updateTrekker(trekkers[i], top, height);
       }
     }
 
