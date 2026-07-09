@@ -1,722 +1,554 @@
-/* =================================================================
-   MOUNTAIN TREK — style.css
-   Phase 2: Static Scaffold
-   
-   Contents:
-     1.  Design Tokens (custom properties)
-     2.  CSS Reset
-     3.  Base styles
-     4.  Typography rules + scope enforcement
-     5.  Scene layout (generic)
-     6.  Scene themes (per-section colour/atmosphere)
-     7.  Summit section specifics
-     8.  Altitude HUD
-     9.  Scroll progress bar
-     10. Responsive breakpoints
-     11. Reduced-motion support
-   
-   Typography hierarchy enforced here:
-     Fraunces  → .scene__heading only  (dominant, large)
-     Alegreya  → .scene__subheading + .scene__body  (supportive)
-     DM Mono   → .scene__tag, .altitude-hud__*, .summit-stat__* only
-                 (incidental, never headline size)
-================================================================= */
+/* ═══════════════════════════════════════════════════════════════
+   JOURNEY TO THE SUMMIT — Premium CSS
+   Award-winning parallax landing page
+═══════════════════════════════════════════════════════════════ */
 
-
-/* ── 1. DESIGN TOKENS ──────────────────────────────────────── */
-
+/* ── 0. Design tokens ────────────────────────────────────────── */
 :root {
-  /* ── ELEVATION PALETTE (named by what they represent) ── */
-  --forest-floor:   #2D4A22; /* deep conifer green — Section 1 bg */
-  --warm-bark:      #8B5E3C; /* trail dirt, bark — Section 1–2 accents */
-  --earth-stone:    #7A6652; /* foothills rock/earth — Section 2 */
-  --cliff-grey:     #5C5C6B; /* rocky ascent — Section 3 */
-  --alpine-mist:    #C8CDD6; /* cloud layer light — Section 4 */
-  --snowline-blue:  #A8C0D6; /* snow-capped ridges — Section 5 */
-  --void-sky:       #1A2B3C; /* deep alpine sky — Section 5–6 */
-  --summit-gold:    #E8A84C; /* RESERVED: summit sunrise only — Section 6 */
-
-  /* ── TEXT ── */
-  --text-on-dark:        #F0EDE6; /* warm off-white for dark bg sections */
-  --text-on-dark-muted:  rgba(240, 237, 230, 0.58);
-  --text-on-light:       #2A3035; /* dark slate for light bg sections */
-  --text-on-light-muted: rgba(42,  48,  53,  0.60);
-
-  /* ── TYPEFACES (scoped — do NOT mix roles) ── */
-  --font-display: 'Fraunces', Georgia, serif;          /* headings ONLY */
-  --font-body:    'Alegreya', Georgia, serif;           /* body + subheadings */
-  --font-mono:    'DM Mono',  'Courier New', monospace; /* numbers/labels ONLY */
-
-  /* ── TYPE SCALE ──
-     DM Mono stays at xs/sm — never approaches heading size.
-     Fraunces starts at scene (≥3rem) — always the visual leader.
-     Alegreya lives at base/sub — quiet support layer.
-  ── */
-  --text-xs:     0.68rem;                                /* DM Mono labels */
-  --text-sm:     0.82rem;                                /* DM Mono detail */
-  --text-base:   1.10rem;                                /* Alegreya body */
-  --text-sub:    1.28rem;                                /* Alegreya subheading */
-  --text-scene:  clamp(3.0rem, 6.5vw, 5.5rem);         /* Fraunces h2 */
-  --text-hero:   clamp(3.8rem, 8.5vw, 7.5rem);         /* Fraunces h1 */
-  --text-summit: clamp(4.5rem, 10vw,  9.0rem);         /* Fraunces summit climax */
-
-  /* ── SPACING ── */
-  --scene-pad-x:   clamp(2rem, 7vw,  7rem);
-  --scene-pad-y:   clamp(5rem, 10vh, 7rem);
-  --content-width: min(44rem, 90vw);
-
-  /* ── HUD ── */
-  --hud-track-height: 200px;
-
-  /* ── EASING ── */
-  --ease-climb: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --bg:            #06090c;
+  --text:          #f0ece4;
+  --text-muted:    rgba(240,236,228,0.62);
+  --accent:        #f2b24e;
+  --accent-dim:    rgba(242,178,78,0.18);
+  --panel-dark:    rgba(6, 10, 15, 0.72);
+  --panel-light:   rgba(248, 244, 236, 0.88);
+  --border-dark:   rgba(255,255,255,0.10);
+  --border-light:  rgba(0,0,0,0.12);
+  --radius-card:   1.25rem;
+  --font-display:  'Fraunces', Georgia, serif;
+  --font-body:     'Inter', 'Segoe UI', sans-serif;
+  --font-mono:     'DM Mono', monospace;
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --hud-height:    160px;
 }
 
-
-/* ── 2. CSS RESET ──────────────────────────────────────────── */
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin:  0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-img, svg {
-  display:   block;
-  max-width: 100%;
-}
-
-abbr[title] {
-  text-decoration: none; /* suppress default dotted underline on .scene__unit */
-}
-
-
-/* ── 3. BASE STYLES ────────────────────────────────────────── */
-
-html, body {
-  width:      100%;
-  overflow-x: hidden;
-}
-
+/* ── 1. Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
-  font-family:             var(--font-body);
-  font-size:               var(--text-base);
-  line-height:             1.75;
-  background-color:        var(--forest-floor);
-  color:                   var(--text-on-dark);
-  -webkit-font-smoothing:  antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-
-/* ── 4. TYPOGRAPHY — SCOPE ENFORCEMENT ─────────────────────── */
-
-/*
-  DM Mono is applied to specific class names only.
-  It should NEVER appear at heading scale.
-  All DM Mono elements stay at --text-xs or --text-sm.
-*/
-.scene__tag,
-.scene__stage,
-.scene__sep,
-.scene__elev,
-.scene__unit,
-.altitude-hud__label,
-.altitude-hud__value,
-.altitude-hud__unit,
-.summit-stat__value,
-.summit-stat__label {
-  font-family: var(--font-mono);
-}
-
-/* Fraunces — headings ONLY */
-.scene__heading {
-  font-family:   var(--font-display);
-  font-style:    italic;
-  font-weight:   600;
-  line-height:   1.04;
-  letter-spacing: -0.02em;
-}
-
-/* Alegreya — subheading + body */
-.scene__subheading,
-.scene__body {
   font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+
+/* ── 2. Scroll progress bar ──────────────────────────────────── */
+.progress-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 200;
+  background: rgba(255,255,255,0.06);
+}
+.progress-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #f2b24e, #ffd980, #f2b24e);
+  background-size: 200% 100%;
+  animation: shimmer-bar 2.4s linear infinite;
+  transform-origin: left;
+  transition: width 0.08s linear;
+}
+@keyframes shimmer-bar {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
-
-/* ── 5. SCENE LAYOUT ───────────────────────────────────────── */
-
-.scene {
-  position:   relative;
-  min-height: 110vh;        /* 100vh sticky text panel + 10vh parallax
-                               transition buffer. The dead-scroll zone below
-                               text is now ~10vh — matching the bottom padding
-                               (~8vh) visible above the text block, per design
-                               feedback. Height-ratio formula adjusts ranges. */
-
-  /* overflow: hidden REMOVED — it breaks position: sticky on .scene__content.
-     SVG layer overflow is now clipped by overflow: hidden on .scene__layers. */
-
-  /* display: flex + padding REMOVED — layout control moved into .scene__content
-     so the sticky wrapper owns its own spacing. */
-}
-
-/*
-  SVG layer container.
-  Position: absolute, fills the scene entirely.
-  z-index 1 — creates stacking context for .layer children.
-  Phase 3: background/midground/foreground SVG silhouettes injected here.
-*/
-.scene__layers {
-  position:       absolute;
-  inset:          0;
+/* ── 3. Cursor glow (desktop only) ──────────────────────────── */
+.cursor-glow {
+  position: fixed;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242,178,78,0.12), transparent 70%);
   pointer-events: none;
-  z-index:        1;
-  overflow:       hidden; /* clips parallax-shifted SVGs to section bounds.
-                             Replaces overflow: hidden on .scene (which would
-                             break position: sticky on .scene__content). */
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+  opacity: 0;
 }
+@media (hover: hover) { .cursor-glow { opacity: 1; } }
 
-/*
-  ── LAYER SYSTEM (Phase 3 addition) ───────────────────────
-  Three layers per section: .layer--bg / .layer--mg / .layer--fg
-  All absolutely positioned, filling the full section area.
-  SVG inside each fills 100%×100%.
-
-  DEPTH DIFFERENTIATION via opacity per scene:
-    BG: lowest opacity  → hazy, furthest from viewer
-    MG: medium opacity  → mid-distance
-    FG: full opacity    → nearest, sharpest
-
-  data-speed on each layer is READ ONLY by Phase 4 GSAP.
-  No transform logic here — purely static positioning in Phase 3.
-  will-change: transform pre-registers these for GPU compositing.
-*/
-.layer {
-  position:       absolute;
-  inset:          0;
-  width:          100%;
-  height:         100%;
-  pointer-events: none;
-  will-change:    transform;
-}
-
-.layer--bg { z-index: 2; }
-.layer--mg { z-index: 3; }
-.layer--fg { z-index: 4; }
-
-.layer svg {
-  position: absolute;
-  bottom:   0;
-  left:     0;
-  width:    100%;
-  height:   100%;
-}
-
-/* Per-scene layer opacities — atmospheric depth illusion */
-.scene--forest   .layer--bg { opacity: 0.48; }
-.scene--forest   .layer--mg { opacity: 0.84; }
-.scene--forest   .layer--fg { opacity: 1.00; }
-
-.scene--foothills .layer--bg { opacity: 0.42; }
-.scene--foothills .layer--mg { opacity: 0.80; }
-.scene--foothills .layer--fg { opacity: 1.00; }
-
-.scene--ascent   .layer--bg { opacity: 0.40; }
-.scene--ascent   .layer--mg { opacity: 0.78; }
-.scene--ascent   .layer--fg { opacity: 1.00; }
-
-/* Cloud section is lighter — all layers at reduced opacity */
-.scene--clouds   .layer--bg { opacity: 0.32; }
-.scene--clouds   .layer--mg { opacity: 0.65; }
-.scene--clouds   .layer--fg { opacity: 0.75; }
-
-/* Snowline: BG peaks must be clearly visible against pale sky */
-.scene--snowline .layer--bg { opacity: 0.55; }
-.scene--snowline .layer--mg { opacity: 0.82; }
-.scene--snowline .layer--fg { opacity: 0.94; }
-
-.scene--summit   .layer--bg { opacity: 0.40; }
-.scene--summit   .layer--mg { opacity: 0.68; }
-.scene--summit   .layer--fg { opacity: 1.00; }
-
-/*
-  Content block — STICKY VIEWPORT ANCHOR (Phase 4 layout fix).
-
-  position: sticky; top: 0; height: 100vh
-    → The content panel sticks to the TOP of the viewport the moment the
-      section scrolls into view, and stays pinned there for the remaining
-      100vh of the section's 200vh scroll distance.
-    → "World moves past fixed text" feel — the standard scroll-narrative
-      pattern for tall parallax sections.
-    → Removes the empty-space-above-text problem that occurred when content
-      was flex-end-anchored to the bottom of a 200vh section.
-
-  The sticky element has width: 100% so it spans the full section width.
-  Text width is constrained via max-width on direct children (see below).
-
-  z-index: 10 keeps text above SVG layers (z-index 1–4) and bleed (z-index 5)
-  without needing the section to be a stacking context — the sticky element
-  itself creates one via position + z-index.
-
-  GSAP/Lenis compatibility: position: sticky is entirely CSS-driven;
-  GSAP's ScrollTrigger still tracks the section element as trigger,
-  and the parallax tweens on .layer elements are unaffected.
-*/
-.scene__content {
-  position:        sticky;
-  top:             0;
-  height:          100vh;
-  width:           100%;
-  display:         flex;
-  flex-direction:  column;
-  justify-content: flex-end;   /* text anchors to bottom of viewport — matches Phase 1 design */
-  align-items:     flex-start; /* left-aligned */
-  padding:         var(--scene-pad-y) var(--scene-pad-x); /* moved from .scene */
-  gap:             1.20rem;
-  z-index:         10;
-  color:           var(--text-on-dark); /* default: dark-bg sections */
-  box-sizing:      border-box;
-}
-
-/* Constrain text line-length within the full-width sticky panel.
-   Applies to all direct children: tag, heading, subheading, body, stats. */
-.scene__content > * {
-  max-width: var(--content-width);
-}
-
-/* Modifier: light-bg sections (clouds, snowline) flip text to dark */
-.scene__content--on-light {
-  color: var(--text-on-light);
-}
-
-/* ── Scene tag — DM Mono, tiny, incidental ── */
-.scene__tag {
-  display:     flex;
-  align-items: center;
-  gap:         0.55em;
-  font-size:   var(--text-xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity:     0.70;
-  color:       inherit;
-}
-
-.scene__sep {
-  opacity: 0.45;
-}
-
-.scene__elev {
-  font-variant-numeric: tabular-nums;
-}
-
-.scene__unit {
-  font-size: 0.85em;
-  margin-left: 0.1em;
-  opacity: 0.75;
-}
-
-/* ── Scene heading — Fraunces, the visual LEADER ── */
-.scene__heading {
-  font-size:  var(--text-scene);
-  color:      inherit;
-}
-
-/* h1 specific — largest Fraunces instance on the page */
-h1.scene__heading {
-  font-size:   var(--text-hero);
-  font-weight: 700;
-}
-
-/* ── Subheading — Alegreya italic, supports quietly ── */
-.scene__subheading {
-  font-size:   var(--text-sub);
-  font-style:  italic;
-  font-weight: 400;
-  line-height: 1.45;
-  opacity:     0.82;
-}
-
-/* ── Body — Alegreya regular, legible, not competing ── */
-.scene__body {
-  font-size:   var(--text-base);
-  font-weight: 400;
-  line-height: 1.80;
-  max-width:   38rem;
-  opacity:     0.78;
-}
-
-
-/* ── 6. SCENE THEMES (per-section gradient backgrounds) ─────── */
-
-/*
-  Each gradient is derived from the palette token for that elevation.
-  Warm → earthy → grey → light mist → cool blue → deep sky.
-  Phase 4 adds .scene__bleed for scroll-scrubbed color crossfades.
-*/
-
-/* ── Color bleed overlay (Phase 4 addition) ─────────────────────────
-   One .scene__bleed per section (except last).
-   Absolutely positioned at the section bottom.
-   Contains a gradient toward the NEXT section's top color.
-   GSAP scrubs opacity 0→1 as the next section enters the viewport,
-   so section boundaries feel like a color bleed rather than a hard cut.
-
-   z-index: 5 → above all SVG layers (z-index 2-4 within scene__layers
-   stacking context), but below scene__content (z-index: 10).
-*/
-.scene__bleed {
-  position:       absolute;
-  bottom:         0;
-  left:           0;
-  width:          100%;
-  height:         18vh;
-  pointer-events: none;
-  z-index:        5;
-  opacity:        0;   /* GSAP animates this 0 → 1 */
-}
-
-/* Section 1 → Section 2: forest dark floor bleeds to foothills warm sky */
-.scene--forest .scene__bleed {
-  background: linear-gradient(to bottom, transparent, #C8B08A);
-}
-/* Sections 2-5 bleeds: added to HTML in Phase 4.2 after Section 1 approval */
-
-/* SECTION 1: Forest Base
-   Top = lighter sky-green so tree silhouettes contrast against it
-   Bottom = very dark forest floor */
-.scene--forest {
-  background: linear-gradient(
-    to bottom,
-    #608E48 0%,
-    #3E6432 18%,
-    var(--forest-floor) 52%,
-    #1A2E12 100%
-  );
-}
-
-/* SECTION 2: Foothills
-   Top = warm hazy sky (tan/ochre) so grey distant peaks read clearly
-   Bottom = deep earth brown */
-.scene--foothills {
-  background: linear-gradient(
-    to bottom,
-    #C8B08A 0%,
-    #9C7A5C 25%,
-    var(--earth-stone)  62%,
-    #4E3C2C 100%
-  );
-}
-
-/* SECTION 3: Rocky Ascent
-   Top = cold grey sky (lighter) so cliff silhouettes have contrast
-   Bottom = very dark slate */
-.scene--ascent {
-  background: linear-gradient(
-    to bottom,
-    #9A9AB0 0%,
-    #747482 25%,
-    var(--cliff-grey) 58%,
-    #3C3C4A 100%
-  );
-}
-
-/* SECTION 4: Cloud Layer
-   Almost white at top (sourceless diffused light) → medium grey at bottom
-   Text uses --on-light colour */
-.scene--clouds {
-  background: linear-gradient(
-    to bottom,
-    #F2EFE9 0%,
-    #E2DFDA 18%,
-    var(--alpine-mist) 62%,
-    #9A9FAD 100%
-  );
-}
-
-/* SECTION 5: Snowline
-   Very pale blue-white winter sky at top → deeper blue at bottom
-   Dark void-sky peaks contrast against the pale sky */
-.scene--snowline {
-  background: linear-gradient(
-    to bottom,
-    #ECF2F8 0%,
-    #CCE0F0 22%,
-    var(--snowline-blue) 65%,
-    #7A9CB2 100%
-  );
-}
-
-/* SECTION 6: Summit
-   Deep pre-dawn sky at top → golden sunrise band in middle
-   → dark alpine atmosphere at bottom (content area)
-   summit-gold gradient = the CSS layer of the sunrise payoff */
-.scene--summit {
-  background: linear-gradient(
-    to bottom,
-    #060E18 0%,
-    var(--void-sky) 22%,
-    #2A3850 38%,
-    var(--summit-gold) 48%,
-    #B06020 55%,
-    var(--void-sky) 72%,
-    #060E18 100%
-  );
-}
-
-
-/* ── 7. SUMMIT SPECIFICS ───────────────────────────────────── */
-
-/*
-  Summit heading uses --summit-gold.
-  This colour appears ONLY here — it is the page's payoff moment.
-  Do not apply --summit-gold anywhere else.
-*/
-.scene__heading--summit {
-  font-size:   var(--text-summit);
-  font-weight: 700;
-  color:       var(--summit-gold);
-}
-
-/* Subheading on summit — brighter than muted default */
-.scene__subheading--summit {
-  opacity: 0.95;
-  color:   var(--text-on-dark);
-}
-
-/* Summit stats block — DM Mono numerical data */
-.summit-stats {
-  display:       flex;
-  gap:           2.5rem;
-  margin-top:    0.75rem;
-  padding-top:   1.25rem;
-  border-top:    1px solid rgba(232, 168, 76, 0.25);
-  flex-wrap:     wrap; /* wraps cleanly on mobile */
-}
-
-.summit-stat {
-  display:        flex;
+/* ── 4. Nav dots ─────────────────────────────────────────────── */
+.nav-dots {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 150;
+  display: flex;
   flex-direction: column;
-  gap:            0.25rem;
+  gap: 0.7rem;
+  align-items: center;
 }
-
-/* DM Mono — numerical value, gold */
-.summit-stat__value {
-  font-size:            1.30rem; /* larger than .scene__tag but half Fraunces — no competition */
-  font-variant-numeric: tabular-nums;
-  color:                var(--summit-gold);
-  letter-spacing:       0.04em;
-  line-height:          1;
+.nav-dot {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.28);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  transition: background 0.25s, transform 0.25s, border-color 0.25s;
+  position: relative;
 }
+.nav-dot::after {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: var(--text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.nav-dot:hover::after { opacity: 0.7; }
+.nav-dot:hover,
+.nav-dot.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.5);
+}
+@media (max-width: 760px) { .nav-dots { display: none; } }
 
-/* DM Mono — tiny label below the value */
-.summit-stat__label {
-  font-size:      var(--text-xs);
+/* ── 5. Altitude HUD ─────────────────────────────────────────── */
+.alt-hud {
+  position: fixed;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  pointer-events: none;
+  user-select: none;
+}
+.alt-hud__label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color:          var(--text-on-dark-muted);
+  color: rgba(240,236,228,0.35);
 }
-
-
-/* ── 8. ALTITUDE HUD ───────────────────────────────────────── */
-
-/*
-  Fixed to right edge, vertically centred.
-  Thin vertical track fills upward (bottom→top) as scroll progresses.
-  Phase 5: .altitude-hud__dot replaced with SVG hiker silhouette.
-  
-  All text inside HUD uses DM Mono — numerals and labels only.
-  Size: 0.68–0.78rem — clearly incidental, never headline scale.
-*/
-.altitude-hud {
-  position:        fixed;
-  right:           1.75rem;
-  top:             50%;
-  transform:       translateY(-50%);
-  z-index:         100;
-  display:         flex;
-  flex-direction:  column;
-  align-items:     center;
-  gap:             0.55rem;
-  pointer-events:  none;
-  user-select:     none;
+.alt-hud__track {
+  width: 2px;
+  height: var(--hud-height);
+  background: rgba(240,236,228,0.12);
+  border-radius: 1px;
+  position: relative;
+  overflow: visible;
 }
+.alt-hud__fill {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to top, var(--accent), rgba(242,178,78,0.3));
+  border-radius: 1px;
+  transition: height 0.1s linear;
+}
+.alt-hud__marker {
+  position: absolute;
+  bottom: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: bottom 0.1s linear;
+}
+.alt-hud__hiker {
+  display: block;
+  width: 16px;
+  height: 24px;
+  color: var(--accent);
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+  animation: hike-bob 0.9s ease-in-out infinite alternate;
+}
+@keyframes hike-bob {
+  0%   { transform: rotate(-2deg); }
+  100% { transform: rotate(2deg) translateY(-1px); }
+}
+@media (prefers-reduced-motion: reduce) { .alt-hud__hiker { animation: none; } }
+.alt-hud__readout {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+.alt-hud__unit {
+  font-size: 0.5rem;
+  opacity: 0.6;
+}
+@media (max-width: 760px) { .alt-hud { display: none; } }
 
-/* "ALT" label — DM Mono, barely-there opacity */
-.altitude-hud__label {
-  font-size:      0.58rem;
-  letter-spacing: 0.18em;
+/* ── 6. HERO ─────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(242,178,78,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(60,110,180,0.12) 0%, transparent 50%),
+    linear-gradient(160deg, #0c1620 0%, #0d1a24 40%, #070c10 100%);
+}
+.hero__stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero__content {
+  position: relative;
+  z-index: 2;
+  max-width: 46rem;
+  text-align: center;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color:          rgba(240, 237, 230, 0.38);
+  color: var(--accent);
+  margin-bottom: 1.6rem;
+  opacity: 0;
+  animation: fade-up 0.8s var(--ease-out) 0.2s forwards;
+}
+.eyebrow__line {
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3.8rem, 9vw, 8rem);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.04em;
+}
+.hero__title-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(40px);
+}
+.hero__title-line:nth-child(1) { animation: fade-up 0.9s var(--ease-out) 0.4s forwards; }
+.hero__title-line:nth-child(2) { animation: fade-up 0.9s var(--ease-out) 0.55s forwards; }
+.hero__title-line:nth-child(3) { animation: fade-up 0.9s var(--ease-out) 0.7s forwards; }
+.hero__title-line--accent {
+  color: var(--accent);
+  font-style: italic;
+  font-size: 0.6em;
+  font-weight: 300;
+}
+@keyframes fade-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero__lead {
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  line-height: 1.8;
+  color: var(--text-muted);
+  max-width: 36rem;
+  margin: 0 auto 2rem;
+  opacity: 0;
+  animation: fade-up 0.9s var(--ease-out) 0.85s forwards;
+}
+.hero__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fade-up 0.9s var(--ease-out) 1s forwards;
+}
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.7rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #1a0d00;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+  box-shadow: 0 0 0 0 rgba(242,178,78,0.4);
+}
+.hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(242,178,78,0.35);
+}
+.hero__ghost {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-dark);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  transition: border-color 0.2s, color 0.2s;
+}
+.hero__ghost:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: var(--text);
+}
+.hero__glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero__glow--amber {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(242,178,78,0.22), transparent 70%);
+  top: -10%; right: -8%;
+  filter: blur(20px);
+  animation: glow-drift 8s ease-in-out infinite alternate;
+}
+.hero__glow--blue {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(60,120,220,0.14), transparent 70%);
+  bottom: -5%; left: -5%;
+  filter: blur(24px);
+  animation: glow-drift 10s ease-in-out infinite alternate-reverse;
+}
+@keyframes glow-drift {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(30px, 20px); }
+}
+.hero__scroll-hint {
+  position: absolute;
+  bottom: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  opacity: 0;
+  animation: fade-up 1s var(--ease-out) 1.4s forwards;
+}
+.hero__scroll-hint-text {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.hero__scroll-hint-arrow {
+  display: block;
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, var(--text-muted), transparent);
+  animation: pulse-down 1.8s ease-in-out infinite;
+}
+@keyframes pulse-down {
+  0%, 100% { transform: scaleY(1); opacity: 0.5; }
+  50%       { transform: scaleY(1.3); opacity: 1; }
 }
 
-/* Vertical track — the path from base to summit */
-.altitude-hud__track {
-  width:          2px;
-  height:         var(--hud-track-height);
-  background:     rgba(240, 237, 230, 0.14);
-  border-radius:  1px;
-  position:       relative;
-  overflow:       visible;
+/* ── 7. Scenes ───────────────────────────────────────────────── */
+.scene {
+  position: relative;
+  min-height: 110vh;
+  overflow: hidden;
+}
+.scene__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+.scene__layer svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scene__layer--back  { z-index: 1; }
+.scene__layer--mid   { z-index: 2; }
+.scene__layer--front { z-index: 3; }
+
+/* Content overlays */
+.scene__content {
+  position: relative;
+  z-index: 4;
+  min-height: 110vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 2.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.scene__content.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Gold fill — grows from bottom as you ascend */
-.altitude-hud__fill {
-  position:        absolute;
-  bottom:          0;
-  left:            0;
-  width:           100%;
-  height:          0%;  /* updated via JS */
-  background:      linear-gradient(
-    to top,
-    var(--summit-gold),
-    rgba(232, 168, 76, 0.35)
-  );
-  border-radius:   1px;
-  transform-origin: bottom center;
-  will-change:     height;
-  transition:      height 0.12s var(--ease-climb);
+/* Glassmorphism card */
+.scene__card {
+  width: min(34rem, 96vw);
+  padding: 1.6rem 1.8rem;
+  border-radius: var(--radius-card);
+  background: var(--panel-dark);
+  border: 1px solid var(--border-dark);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.scene__card--light {
+  background: var(--panel-light);
+  color: #101418;
+  border-color: var(--border-light);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.22),
+    0 1px 0 rgba(255,255,255,0.5) inset;
+}
+.scene__card--summit {
+  background: rgba(20, 12, 4, 0.82);
+  border-color: rgba(242,178,78,0.3);
+  box-shadow:
+    0 8px 48px rgba(242,178,78,0.2),
+    0 1px 0 rgba(242,178,78,0.12) inset;
 }
 
-/* Marker — climbs the track with scroll.
-   transform: the hiker's FEET (bottom of SVG) must sit on the
-   track position, not the hiker's center. So we translate -100%
-   on Y (up by full hiker height) and -50% on X (center on track). */
-.altitude-hud__marker {
-  position:   absolute;
-  bottom:     0%;   /* updated via JS — 0% = base, 100% = summit */
-  left:       50%;
-  transform:  translateX(-50%) translateY(0);
-  will-change: bottom;
-  transition: bottom 0.12s var(--ease-climb);
+/* Card typography */
+.scene__tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.65rem;
+  opacity: 0.9;
+}
+.scene__card--light .scene__tag { color: #a0600a; }
+.scene h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  line-height: 1;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+}
+.scene__subheading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  opacity: 0.85;
+}
+.scene__body {
+  font-size: 0.96rem;
+  line-height: 1.75;
+  opacity: 0.78;
+  margin-bottom: 1rem;
+}
+.scene__meta {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border-dark);
+}
+.scene__card--light .scene__meta { border-top-color: var(--border-light); }
+.scene__card--summit .scene__meta { border-top-color: rgba(242,178,78,0.2); }
+.scene__stat {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.3rem;
+}
+.scene__stat strong {
+  color: var(--accent);
+  font-weight: 500;
+}
+.scene__card--light .scene__stat { color: rgba(0,0,0,0.55); }
+.scene__card--light .scene__stat strong { color: #a0600a; }
+.scene__meta--summit .scene__stat { color: rgba(240,236,228,0.55); }
+.scene__meta--summit .scene__stat strong { color: #ffd980; }
+
+/* Scene background gradients */
+.scene--forest    { background: linear-gradient(180deg, #4d6c3f 0%, #2e4b24 42%, #16220f 100%); }
+.scene--waterfall { background: linear-gradient(180deg, #9bd2de 0%, #5f8a96 45%, #2f4349 100%); }
+.scene--cliff     { background: linear-gradient(180deg, #6d7681 0%, #3f4852 42%, #201d23 100%); }
+.scene--snow      { background: linear-gradient(180deg, #e1edf4 0%, #98b0c2 44%, #4c6173 100%); }
+.scene--night     { background: linear-gradient(180deg, #07131e 0%, #14253b 42%, #050608 100%); }
+.scene--summit    { background: linear-gradient(180deg, #ffce76 0%, #c98129 40%, #2d170c 100%); }
+
+/* ── 8. Footer ───────────────────────────────────────────────── */
+.footer {
+  padding: 2.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid var(--border-dark);
+  background: #04070a;
+}
+.footer__credit {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.footer__back {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  transition: opacity 0.2s;
+}
+.footer__back:hover { opacity: 0.7; }
+
+/* ── 9. Responsive ───────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .hero { padding: 1.2rem; }
+  .hero__title { font-size: clamp(2.8rem, 14vw, 4rem); }
+  .scene__content { padding: 1.2rem; }
+  .scene__card { width: 100%; }
+  .footer { flex-direction: column; text-align: center; }
 }
 
-/* ── Phase 5: Hiker silhouette ─────────────────────────────────
-   Replaces .altitude-hud__dot.
-   color: --summit-gold → SVG fill="currentColor" picks this up.
-   Subtle walk-bob animation gives the hiker life as it climbs.
-   Animation paused for prefers-reduced-motion users.
-── */
-.altitude-hud__hiker {
-  display:     block;
-  width:       18px;
-  height:      27px;
-  color:       var(--summit-gold);
-  filter:      drop-shadow(0 1px 3px rgba(0,0,0,0.45));
-  animation:   hiker-walk 0.85s ease-in-out infinite alternate;
-}
-
-@keyframes hiker-walk {
-  0%   { transform: rotate(-2deg) translateY(0px);   }
-  100% { transform: rotate( 2deg) translateY(-1px);  }
-}
-
+/* ── 10. Reduced motion ──────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .altitude-hud__hiker { animation: none; }
-}
-
-/* Altitude value display — DM Mono, tabular numerals */
-.altitude-hud__readout {
-  font-family:  var(--font-mono);
-  font-size:    var(--text-xs);
-  color:        rgba(240, 237, 230, 0.55);
-  text-align:   center;
-  line-height:  1.2;
-}
-
-.altitude-hud__value {
-  display:              block;
-  font-size:            0.78rem;
-  font-variant-numeric: tabular-nums;
-  color:                rgba(240, 237, 230, 0.88);
-  letter-spacing:       0.04em;
-}
-
-.altitude-hud__unit {
-  font-size: 0.58rem;
-  opacity:   0.55;
-}
-
-
-/* ── 9. SCROLL PROGRESS BAR ────────────────────────────────── */
-
-/* Thin gold bar pinned to the very top of the viewport */
-.scroll-progress {
-  position:   fixed;
-  top:        0;
-  left:       0;
-  width:      100%;
-  height:     2px;
-  background: rgba(240, 237, 230, 0.08);
-  z-index:    200;
-}
-
-.scroll-progress__fill {
-  height:           100%;
-  width:            0%;   /* updated via JS */
-  background:       var(--summit-gold);
-  transform-origin: left center;
-  will-change:      width;
-  transition:       width 0.08s linear;
-}
-
-
-/* ── 10. RESPONSIVE ────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  :root {
-    --scene-pad-x:      1.75rem;
-    --scene-pad-y:      3.5rem;
-    --hud-track-height: 140px;
+  .hero__title-line,
+  .eyebrow,
+  .hero__lead,
+  .hero__actions,
+  .hero__scroll-hint {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
-
-  /* Tighten summit stats on tablet */
-  .summit-stats {
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  :root {
-    --scene-pad-x: 1.25rem;
-    --scene-pad-y: 2.5rem;
-  }
-
-  /* Hide HUD on very small screens — not enough edge space */
-  .altitude-hud {
-    display: none;
-  }
-
-  /* Compress summit stats to 2-column */
-  .summit-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-  }
-}
-
-
-/* ── 11. REDUCED MOTION ────────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-  /*
-    Phase 4+: The JS parallax and GSAP animations should check this.
-    For now, disable the transition-based HUD animations.
-    A data-reduced-motion attribute will be set on <body> in main.js
-    so GSAP can read it.
-  */
-  .altitude-hud__fill,
-  .altitude-hud__marker,
-  .scroll-progress__fill {
-    transition: none;
-  }
-
-  html {
-    scroll-behavior: auto;
-  }
+  .hero__glow--amber,
+  .hero__glow--blue { animation: none; }
+  .scene__content { opacity: 1; transform: none; }
 }

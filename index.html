@@ -1,839 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Mountain Trek — an immersive parallax scrolling journey through six stages of elevation, from forest base at 1,200m to alpine summit at 4,200m. Built with GSAP ScrollTrigger.">
-  <meta name="theme-color" content="#2D4A22">
-  <title>Mountain Trek — Forest to Summit</title>
-  <link rel="canonical" href="/">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Journey to the Summit — a cinematic parallax scrolling experience through six stages of the mountain." />
+    <meta name="theme-color" content="#06090c" />
+    <title>Journey to the Summit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
 
-  <!--
-    TYPOGRAPHY — Three-face system, scoped by role:
-      Fraunces  → display headings ONLY (leads visually)
-      Alegreya  → body paragraphs + subheadings (supports)
-      DM Mono   → altitude readout + labels ONLY (stays incidental)
-  -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Alegreya:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-  <!--
-    ══════════════════════════════════════════════════════
-    FIXED UI — Altitude HUD
-    Vertical track on right edge. Fill + marker animate with scroll.
-    Phase 5: the dot marker becomes a hiker SVG silhouette.
-    ══════════════════════════════════════════════════════
-  -->
-  <aside class="altitude-hud" id="altitude-hud" aria-label="Current altitude tracker">
-    <span class="altitude-hud__label">ALT</span>
-    <div class="altitude-hud__track"
-         role="progressbar"
-         aria-valuemin="1200"
-         aria-valuemax="4200"
-         aria-valuenow="1200"
-         aria-label="Altitude progress">
-      <div class="altitude-hud__fill"   id="js-hud-fill"   aria-hidden="true"></div>
-      <div class="altitude-hud__marker" id="js-hud-marker" aria-hidden="true">
-        <!--
-          Phase 5: Hiker silhouette — replaces the plain dot.
-          Side-profile, backpack, walking pole.
-          Flat geometric shapes — same visual vocabulary as the section SVGs.
-          fill="currentColor" → inherits CSS color (var(--summit-gold)).
-          Positioned so feet sit on the track line (transform on parent).
-        -->
-        <svg class="altitude-hud__hiker"
-             viewBox="0 0 20 30"
-             xmlns="http://www.w3.org/2000/svg"
-             fill="currentColor">
-          <!-- Head -->
-          <circle cx="13" cy="4"  r="3.2"/>
-          <!-- Backpack (behind torso, slightly wider left) -->
-          <rect   x="5"  y="8"  width="5"   height="8"  rx="1"/>
-          <!-- Torso -->
-          <rect   x="9"  y="8"  width="4.5" height="8.5"/>
-          <!-- Left leg — trailing, angled back -->
-          <polygon points="9.5,16.5 13,16.5 11,28 8,28"/>
-          <!-- Right leg — leading, angled forward -->
-          <polygon points="11,16.5 14,16.5 15,28 12,28"/>
-          <!-- Walking pole — thin rect, angled away from body -->
-          <rect   x="17.5" y="11" width="1.6" height="17" rx="0.8"
-                  transform="rotate(12 18.3 19.5)"/>
-        </svg>
-      </div>
+    <!-- ── Scroll progress bar ────────────────────────────── -->
+    <div class="progress-bar" aria-hidden="true">
+      <span id="progress-fill"></span>
     </div>
-    <div class="altitude-hud__readout" aria-live="polite" aria-atomic="true">
-      <span class="altitude-hud__value" id="js-altitude-value">1,200</span><span class="altitude-hud__unit">m</span>
-    </div>
-  </aside>
 
-  <!-- Thin gold scroll progress bar pinned to top -->
-  <div class="scroll-progress" id="js-scroll-progress" aria-hidden="true">
-    <div class="scroll-progress__fill" id="js-progress-fill"></div>
-  </div>
+    <!-- ── Cursor glow ────────────────────────────────────── -->
+    <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
+    <!-- ── Sticky nav dots ───────────────────────────────── -->
+    <nav class="nav-dots" aria-label="Section navigation">
+      <a href="#top"       class="nav-dot" data-label="Hero"      aria-label="Go to hero"></a>
+      <a href="#forest"    class="nav-dot" data-label="Forest"    aria-label="Go to forest"></a>
+      <a href="#waterfall" class="nav-dot" data-label="Waterfall" aria-label="Go to waterfall"></a>
+      <a href="#cliff"     class="nav-dot" data-label="Cliff"     aria-label="Go to cliff"></a>
+      <a href="#snow"      class="nav-dot" data-label="Snowline"  aria-label="Go to snowline"></a>
+      <a href="#night"     class="nav-dot" data-label="Night"     aria-label="Go to night camp"></a>
+      <a href="#summit"    class="nav-dot" data-label="Summit"    aria-label="Go to summit"></a>
+    </nav>
 
-  <!-- ══════════════════════════════════════════════════════
-       MAIN CONTENT — 6 Scenes
-       SVG LAYER VOCABULARY (consistent across all sections):
-         • Terrain = bezier-curve filled paths, all reach y=900
-         • Peaks   = polygon zigzag paths (M...L...L...Z)
-         • Trees   = stacked triangle polygons
-         • Rocks   = ellipses + polygon clusters
-         • Clouds  = bumpy-top bezier closed paths
-         • Fills   = CSS custom property tokens ONLY
-         • Strokes = none (flat fill only)
-  ══════════════════════════════════════════════════════ -->
-  <main id="main">
+    <!-- ══════════════════════════════════════════════════════
+         HERO
+    ══════════════════════════════════════════════════════ -->
+    <header class="hero" id="top">
+      <!-- Animated particle stars -->
+      <canvas class="hero__stars" id="hero-stars" aria-hidden="true"></canvas>
 
-
-    <!-- ╔══════════════════════════════════════════════════╗
-         ║  SCENE 1 · FOREST BASE · 1,200m                ║
-         ║  Mood: deep green, warm amber canopy light      ║
-         ╚══════════════════════════════════════════════════╝ -->
-    <section class="scene scene--forest" id="scene-forest" aria-label="Stage 1 — Forest Base">
-
-      <div class="scene__layers" aria-hidden="true" id="layers-forest">
-
-        <!--
-          LAYER BG — Distant rolling hills
-          Fill: --earth-stone (brownish haze reads as far-off terrain)
-          Opacity: 0.45 via CSS (hazy, furthest from viewer)
-          data-speed="0.15" → Phase 4 will move this slowest
-        -->
-        <div class="layer layer--bg" data-layer="bg" data-speed="0.15">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <!-- Two overlapping distant hills -->
-            <path fill="var(--earth-stone)"
-                  d="M0,900 L0,608 C180,548 360,582 540,560
-                     C720,538 900,572 1080,550
-                     C1200,536 1340,554 1440,542 L1440,900 Z"/>
-            <path fill="var(--earth-stone)" opacity="0.55"
-                  d="M0,900 L0,668 C120,630 240,652 360,634
-                     C480,616 600,640 720,620
-                     C840,600 960,624 1080,604
-                     C1200,584 1320,610 1440,594 L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER MG — Dense forest treeline/canopy
-          Fill: --forest-floor (the defining green of this section)
-          Opacity: 0.82 via CSS
-          data-speed="0.40"
-        -->
-        <div class="layer layer--mg" data-layer="mg" data-speed="0.40">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <!-- Irregular canopy ridgeline — bumpy top suggests tree crowns -->
-            <path fill="var(--forest-floor)"
-                  d="M0,900 L0,780 C35,756 70,770 105,750
-                     C140,730 165,758 205,736
-                     C245,714 285,750 328,726
-                     C371,702 418,736 466,712
-                     C514,688 564,722 614,698
-                     C664,674 716,708 768,684
-                     C820,660 872,696 924,672
-                     C976,648 1028,684 1080,660
-                     C1132,636 1186,672 1240,648
-                     C1294,624 1368,662 1440,634 L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER FG — Tall individual pine trees + trail signpost
-          Trees:    fill: --void-sky (darkest token → sharpest silhouette)
-          Signpost: fill: --warm-bark (wood = warm brown, distinct from trees)
-          Opacity: 1.00 via CSS
-          data-speed="0.85"
-          Pine tree silhouette = 4 stacked triangle polygons + trunk rect
-          (consistent triangle-stack vocabulary used in all tree instances)
-        -->
-        <div class="layer layer--fg" data-layer="fg" data-speed="0.85">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-
-            <!-- TREES: stacked-triangle silhouette style -->
-            <g fill="var(--void-sky)">
-              <!-- Tree 1 · cx=155 · tallest -->
-              <rect x="147" y="822" width="16" height="78"/>
-              <polygon points="85,900 155,680 225,900"/>
-              <polygon points="100,718 155,498 210,718"/>
-              <polygon points="115,535 155,367 195,535"/>
-              <polygon points="135,405 155,292 175,405"/>
-
-              <!-- Tree 2 · cx=335 -->
-              <rect x="327" y="835" width="16" height="65"/>
-              <polygon points="270,900 335,705 400,900"/>
-              <polygon points="284,742 335,534 386,742"/>
-              <polygon points="298,572 335,405 372,572"/>
-              <polygon points="318,442 335,332 352,442"/>
-
-              <!-- Tree 3 · cx=505 · slightly shorter -->
-              <rect x="497" y="845" width="16" height="55"/>
-              <polygon points="443,900 505,720 567,900"/>
-              <polygon points="457,757 505,550 553,757"/>
-              <polygon points="470,587 505,422 540,587"/>
-              <polygon points="489,458 505,350 521,458"/>
-
-              <!-- Tree 4 right · cx=1285 · shorter (distance) -->
-              <rect x="1278" y="858" width="14" height="42"/>
-              <polygon points="1232,900 1285,742 1338,900"/>
-              <polygon points="1245,778 1285,588 1325,778"/>
-              <polygon points="1257,618 1285,456 1313,618"/>
-              <polygon points="1273,490 1285,385 1297,490"/>
-
-              <!-- Tree 5 right · cx=1390 · shortest right -->
-              <rect x="1383" y="865" width="14" height="35"/>
-              <polygon points="1348,900 1390,752 1432,900"/>
-              <polygon points="1359,787 1390,603 1421,787"/>
-              <polygon points="1370,636 1390,484 1410,636"/>
-              <polygon points="1380,515 1390,413 1400,515"/>
-            </g>
-
-            <!-- TRAIL SIGNPOST · warm wood tone -->
-            <g fill="var(--warm-bark)">
-              <rect x="1116" y="728" width="8" height="172"/>
-              <rect x="1090" y="706" width="108" height="27" rx="2"/>
-              <rect x="1100" y="741" width="82" height="20" rx="2"/>
-            </g>
-
-          </svg>
-        </div>
-
-      </div><!-- /#layers-forest -->
-
-      <!--
-        Color bleed overlay — GSAP scrubs opacity 0→1 as Section 2 enters.
-        Gradient bleeds foothills' warm tan sky into Section 1's bottom edge.
-        z-index: 5 — above SVG layers (2–4), below content text (10).
-      -->
-      <div class="scene__bleed" aria-hidden="true"></div>
-
-      <div class="scene__content">
-        <p class="scene__tag" aria-label="Stage 1 of 6, elevation 1200 metres">
-          <span class="scene__stage">Stage 01</span>
-          <span class="scene__sep" aria-hidden="true">·</span>
-          <span class="scene__elev">1,200<abbr class="scene__unit" title="metres">m</abbr></span>
+      <div class="hero__content">
+        <p class="eyebrow">
+          <span class="eyebrow__line"></span>
+          A cinematic scroll experience
         </p>
-        <h1 class="scene__heading">The Trailhead</h1>
-        <p class="scene__subheading">Where the forest swallows the path</p>
-        <p class="scene__body">
-          The sign at the trailhead is weathered beyond easy reading.
-          Someone has carved their initials into the wooden post below it.
-          The pines grow so close together that even midday light arrives
-          as thin, amber needles through the canopy.
-          The air smells of resin and cold earth.
-          You tighten your straps and begin.
+        <h1 class="hero__title">
+          <span class="hero__title-line">Journey</span>
+          <span class="hero__title-line hero__title-line--accent">to the</span>
+          <span class="hero__title-line">Summit</span>
+        </h1>
+        <p class="hero__lead">
+          Six stages. One mountain. An immersive, layered scroll through forest,
+          waterfall, cliff, snow, night, and sunrise — built to feel like movement.
         </p>
+        <div class="hero__actions">
+          <a class="hero__cta" href="#forest" id="cta-start">
+            Start the climb
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 3v10M3 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a class="hero__ghost" href="#summit">Skip to summit</a>
+        </div>
       </div>
-    </section>
 
-
-    <!-- ╔══════════════════════════════════════════════════╗
-         ║  SCENE 2 · FOOTHILLS · 1,800m                  ║
-         ║  Mood: olive/earth, first view of the range     ║
-         ╚══════════════════════════════════════════════════╝ -->
-    <section class="scene scene--foothills" id="scene-foothills" aria-label="Stage 2 — Foothills">
-
-      <div class="scene__layers" aria-hidden="true" id="layers-foothills">
-
-        <!--
-          LAYER BG — Distant mountain range
-          Fill: --cliff-grey (far mountains desaturate to grey-blue in haze)
-          Polygon zigzag = angular peaks (same vocabulary used in all mountain layers)
-        -->
-        <div class="layer layer--bg" data-layer="bg" data-speed="0.15">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <path fill="var(--cliff-grey)"
-                  d="M0,900 L0,518
-                     L90,445 L178,498 L265,388 L355,478
-                     L440,372 L530,462 L618,355 L708,448
-                     L795,342 L885,438 L972,372 L1062,465
-                     L1150,402 L1242,492 L1328,432 L1420,468
-                     L1440,458 L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER MG — Rolling foothills
-          Fill: --earth-stone (warm earth, mid-distance terrain)
-        -->
-        <div class="layer layer--mg" data-layer="mg" data-speed="0.40">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <path fill="var(--earth-stone)"
-                  d="M0,900 L0,648 C120,610 240,638 360,618
-                     C480,598 600,628 720,608
-                     C840,588 960,618 1080,598
-                     C1200,578 1320,605 1440,584 L1440,900 Z"/>
-            <!-- Second rolling hill for depth -->
-            <path fill="var(--earth-stone)" opacity="0.65"
-                  d="M0,900 L0,718 C100,690 220,710 340,695
-                     C460,680 580,705 700,688
-                     C820,671 940,694 1060,678
-                     C1180,662 1310,688 1440,668 L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER FG — Rocks, boulders, trail path
-          Fill: --warm-bark (nearest terrain = warmer, darker earth tone)
-          Rocks = ellipse shapes (consistent boulder vocabulary)
-          Trail = thin filled ribbon path
-        -->
-        <div class="layer layer--fg" data-layer="fg" data-speed="0.85">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--warm-bark)">
-              <!-- Winding trail ribbon -->
-              <path d="M0,900 C55,878 128,866 208,856
-                       C288,846 368,854 448,842
-                       C528,830 608,838 688,822 L688,832
-                       C608,848 528,840 448,852
-                       C368,864 288,856 208,866
-                       C128,876 55,888 0,910 Z"/>
-              <!-- Boulder cluster left -->
-              <ellipse cx="148" cy="878" rx="78" ry="40"/>
-              <ellipse cx="278" cy="872" rx="62" ry="32"/>
-              <ellipse cx="365" cy="885" rx="44" ry="24"/>
-              <!-- Boulder cluster right -->
-              <ellipse cx="1055" cy="868" rx="60" ry="33"/>
-              <ellipse cx="1188" cy="876" rx="74" ry="40"/>
-              <ellipse cx="1322" cy="872" rx="52" ry="28"/>
-              <!-- Scattered small rocks -->
-              <ellipse cx="578" cy="888" rx="30" ry="16"/>
-              <ellipse cx="820" cy="884" rx="36" ry="20"/>
-              <ellipse cx="920" cy="890" rx="24" ry="13"/>
-            </g>
-          </svg>
-        </div>
-
-      </div><!-- /#layers-foothills -->
-
-      <div class="scene__content">
-        <p class="scene__tag" aria-label="Stage 2 of 6, elevation 1800 metres">
-          <span class="scene__stage">Stage 02</span>
-          <span class="scene__sep" aria-hidden="true">·</span>
-          <span class="scene__elev">1,800<abbr class="scene__unit" title="metres">m</abbr></span>
-        </p>
-        <h2 class="scene__heading">The Foothills Open</h2>
-        <p class="scene__subheading">The range reveals itself for the first time</p>
-        <p class="scene__body">
-          Above the treeline's first shelf, the path flattens and you turn to look back.
-          The valley is already small. Ahead, the main range emerges from its own shadow —
-          ridge after ridge folded into distance, each a paler shade of itself.
-          You count four visible layers.
-          The summit is somewhere behind the last one.
-        </p>
-      </div>
-    </section>
-
-
-    <!-- ╔══════════════════════════════════════════════════╗
-         ║  SCENE 3 · ROCKY ASCENT · 2,600m               ║
-         ║  Mood: grey-brown, harsher light, no more soil  ║
-         ╚══════════════════════════════════════════════════╝ -->
-    <section class="scene scene--ascent" id="scene-ascent" aria-label="Stage 3 — Rocky Ascent">
-
-      <div class="scene__layers" aria-hidden="true" id="layers-ascent">
-
-        <!--
-          LAYER BG — Far peaks + high cloud wisps
-          Fill: --cliff-grey (hazy distant peaks)
-          Higher/sharper peaks than foothills BG
-        -->
-        <div class="layer layer--bg" data-layer="bg" data-speed="0.15">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--cliff-grey)">
-              <!-- Far jagged mountain range -->
-              <path d="M0,900 L0,465
-                       L72,385 L152,438 L235,322 L320,425
-                       L402,312 L488,408 L568,295 L655,392
-                       L735,282 L822,378 L902,292 L990,390
-                       L1070,328 L1160,430 L1248,358 L1340,452
-                       L1420,392 L1440,408 L1440,900 Z"/>
-              <!-- Cloud wisps (same fill, low opacity, upper area) -->
-              <path opacity="0.55"
-                    d="M828,308 C853,286 902,294 930,312
-                       C958,330 964,310 998,299
-                       C1032,288 1053,312 1046,330
-                       C1039,348 1002,342 966,350
-                       C930,358 892,346 862,338
-                       C832,330 814,324 828,308 Z"/>
-              <path opacity="0.45"
-                    d="M418,338 C446,317 492,326 518,344
-                       C544,362 549,342 578,332
-                       C607,322 626,345 618,362
-                       C610,379 578,372 548,380
-                       C518,388 484,376 456,368
-                       C428,360 406,352 418,338 Z"/>
-            </g>
-          </svg>
-        </div>
-
-        <!--
-          LAYER MG — Cliff faces, switchback terrain
-          Fill: --cliff-grey (near cliffs, same palette deeper in the scene)
-          Jagged horizontal ridgeline = cliff-face vocabulary
-        -->
-        <div class="layer layer--mg" data-layer="mg" data-speed="0.40">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <path fill="var(--cliff-grey)"
-                  d="M0,900 L0,568
-                     L58,525 L118,565 L158,495 L218,545
-                     L278,478 L338,532 L395,465 L455,518
-                     L515,452 L575,508 L635,442 L695,498
-                     L755,432 L815,488 L875,425 L935,482
-                     L995,418 L1055,475 L1115,412 L1175,468
-                     L1235,408 L1295,465 L1355,412 L1440,455
-                     L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER FG — Boulders, scree field
-          Fill: --void-sky (darkest token → heaviest, nearest rocks)
-          Mix of large boulder ellipses + angular outcrop path
-        -->
-        <div class="layer layer--fg" data-layer="fg" data-speed="0.85">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--void-sky)">
-              <!-- Left boulder outcrop (angular) -->
-              <path d="M0,900 L0,795
-                       C32,768 74,750 118,764
-                       C162,778 172,750 218,734
-                       C264,718 285,748 322,768
-                       C359,788 368,756 408,900 Z"/>
-              <!-- Individual boulders across scene -->
-              <ellipse cx="562" cy="862" rx="78" ry="44"/>
-              <ellipse cx="682" cy="878" rx="52" ry="30"/>
-              <ellipse cx="822" cy="856" rx="96" ry="52"/>
-              <ellipse cx="970" cy="868" rx="68" ry="38"/>
-              <ellipse cx="1122" cy="858" rx="86" ry="47"/>
-              <ellipse cx="1270" cy="870" rx="58" ry="32"/>
-              <ellipse cx="1402" cy="880" rx="50" ry="28"/>
-              <!-- Small scree scatter -->
-              <ellipse cx="480" cy="890" rx="28" ry="15"/>
-              <ellipse cx="752" cy="893" rx="22" ry="12"/>
-              <ellipse cx="1052" cy="892" rx="32" ry="17"/>
-              <ellipse cx="1200" cy="895" rx="18" ry="10"/>
-            </g>
-          </svg>
-        </div>
-
-      </div><!-- /#layers-ascent -->
-
-      <div class="scene__content">
-        <p class="scene__tag" aria-label="Stage 3 of 6, elevation 2600 metres">
-          <span class="scene__stage">Stage 03</span>
-          <span class="scene__sep" aria-hidden="true">·</span>
-          <span class="scene__elev">2,600<abbr class="scene__unit" title="metres">m</abbr></span>
-        </p>
-        <h2 class="scene__heading">The Rock Begins</h2>
-        <p class="scene__subheading">No more soil. Only stone.</p>
-        <p class="scene__body">
-          The switchbacks here are brutal and honest — no shortcuts, no shorthand.
-          Each hairpin gains thirty metres of altitude and costs ten minutes of breath.
-          Vegetation is gone except for sparse, tough grass in the crack lines.
-          Above the next crest: grey sky and darker grey rock,
-          and the sound of your own footsteps becoming very loud.
-        </p>
-      </div>
-    </section>
-
-
-    <!-- ╔══════════════════════════════════════════════════╗
-         ║  SCENE 4 · CLOUD LAYER · 3,200m                ║
-         ║  Mood: soft white-grey, diffused sourceless light║
-         ╚══════════════════════════════════════════════════╝ -->
-    <section class="scene scene--clouds" id="scene-clouds" aria-label="Stage 4 — Cloud Layer">
-
-      <div class="scene__layers" aria-hidden="true" id="layers-clouds">
-
-        <!--
-          LAYER BG — Sun glow breaking through
-          Fill: --summit-gold (the ONLY section where gold touches the bg)
-          Low layer opacity (0.30) = soft, diffused glow, not garish
-        -->
-        <div class="layer layer--bg" data-layer="bg" data-speed="0.15">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--summit-gold)">
-              <!-- Concentric sun glow ellipses -->
-              <ellipse cx="720" cy="185" rx="175" ry="145"/>
-              <ellipse cx="720" cy="225" rx="285" ry="228" opacity="0.5"/>
-              <ellipse cx="720" cy="272" rx="428" ry="310" opacity="0.25"/>
-              <!-- Horizon glow band -->
-              <path opacity="0.2"
-                    d="M0,575 C240,553 480,565 720,545
-                       C960,525 1200,548 1440,530 L1440,610
-                       C1200,628 960,605 720,625
-                       C480,645 240,622 0,645 Z"/>
-            </g>
-          </svg>
-        </div>
-
-        <!--
-          LAYER MG — Drifting mist and cloud banks
-          Fill: --cliff-grey (grey clouds read subtly on the lighter bg)
-          Cloud shape vocabulary: bumpy bezier top, filled solid path to y=900
-        -->
-        <div class="layer layer--mg" data-layer="mg" data-speed="0.40">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--cliff-grey)">
-              <!-- Main cloud bank sweeping across mid-section -->
-              <path d="M-40,900 L-40,598
-                       C50,568 140,582 220,565
-                       C300,548 378,568 462,552
-                       C546,536 622,556 706,540
-                       C790,524 866,545 950,530
-                       C1034,515 1108,535 1192,520
-                       C1276,505 1354,528 1480,515
-                       L1480,900 Z"/>
-              <!-- Floating cloud shape 1 (left) -->
-              <path d="M115,442 C140,412 194,420 228,438
-                       C262,456 272,434 312,424
-                       C352,414 374,440 364,462
-                       C354,484 312,477 272,484
-                       C232,491 190,480 155,470
-                       C120,460 96,466 115,442 Z"/>
-              <!-- Floating cloud shape 2 (center) -->
-              <path d="M668,380 C696,352 752,360 788,380
-                       C824,400 834,378 876,368
-                       C918,358 940,382 930,402
-                       C920,422 876,416 838,424
-                       C800,432 754,422 718,412
-                       C682,402 646,402 668,380 Z"/>
-              <!-- Floating cloud shape 3 (right) -->
-              <path d="M1042,462 C1068,434 1124,442 1158,460
-                       C1192,478 1202,456 1240,446
-                       C1278,436 1300,460 1290,480
-                       C1280,500 1240,494 1202,502
-                       C1164,510 1120,500 1086,490
-                       C1052,480 1028,484 1042,462 Z"/>
-              <!-- Wispy drift band upper -->
-              <path opacity="0.5"
-                    d="M0,488 C90,478 180,486 268,476
-                       C356,466 444,478 532,468 L532,482
-                       C444,492 356,480 268,490
-                       C180,500 90,492 0,502 Z"/>
-            </g>
-          </svg>
-        </div>
-
-        <!--
-          LAYER FG — Rocky ledge edges emerging from mist
-          Fill: --cliff-grey (same palette, different shapes — ledge vs cloud)
-          Section 4 is LIGHT, so fg uses lower opacity in CSS (0.78)
-        -->
-        <div class="layer layer--fg" data-layer="fg" data-speed="0.85">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--cliff-grey)">
-              <!-- Left rocky ledge emerging from cloud -->
-              <path d="M0,900 L0,802
-                       C28,778 66,760 108,775
-                       C150,790 160,762 200,750
-                       C240,738 260,765 290,783 L290,900 Z"/>
-              <!-- Right rocky ledge -->
-              <path d="M1148,900 L1148,782
-                       C1188,764 1232,778 1272,768
-                       C1312,758 1340,775 1386,792
-                       C1410,800 1428,786 1440,790
-                       L1440,900 Z"/>
-              <!-- Small peaks poking through fog -->
-              <ellipse cx="498" cy="880" rx="55" ry="28"/>
-              <ellipse cx="780" cy="876" rx="40" ry="22"/>
-              <ellipse cx="920" cy="882" rx="48" ry="25"/>
-              <ellipse cx="650" cy="886" rx="32" ry="16"/>
-            </g>
-          </svg>
-        </div>
-
-      </div><!-- /#layers-clouds -->
-
-      <div class="scene__content scene__content--on-light">
-        <p class="scene__tag" aria-label="Stage 4 of 6, elevation 3200 metres">
-          <span class="scene__stage">Stage 04</span>
-          <span class="scene__sep" aria-hidden="true">·</span>
-          <span class="scene__elev">3,200<abbr class="scene__unit" title="metres">m</abbr></span>
-        </p>
-        <h2 class="scene__heading">Into the White</h2>
-        <p class="scene__subheading">The clouds have a floor and you have crossed it</p>
-        <p class="scene__body">
-          Visibility contracts to fifty metres, then thirty.
-          The light becomes sourceless — bright everywhere, from nowhere.
-          You cannot tell where rock ends and cloud begins.
-          Then, for thirty seconds, the mist parts and the sun falls through in a single column,
-          illuminating a ridge two hundred metres away as if it were a stage set.
-          Then the curtain closes again.
-        </p>
-      </div>
-    </section>
-
-
-    <!-- ╔══════════════════════════════════════════════════╗
-         ║  SCENE 5 · SNOWLINE · 3,800m                   ║
-         ║  Mood: cool blue-white, structural cold         ║
-         ╚══════════════════════════════════════════════════╝ -->
-    <section class="scene scene--snowline" id="scene-snowline" aria-label="Stage 5 — Snowline">
-
-      <div class="scene__layers" aria-hidden="true" id="layers-snowline">
-
-        <!--
-          LAYER BG — Jagged alpine peaks
-          Fill: --void-sky (darkest token, far peaks appear as dark silhouettes
-                against the pale winter sky background)
-          Very sharp, high peaks (tallest peaks of the whole journey)
-        -->
-        <div class="layer layer--bg" data-layer="bg" data-speed="0.15">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <path fill="var(--void-sky)"
-                  d="M0,900 L0,418
-                     L72,332 L148,382 L225,265 L302,362
-                     L378,250 L455,348 L532,235 L608,335
-                     L685,220 L762,318 L838,232 L915,325
-                     L992,245 L1068,340 L1145,272 L1222,358
-                     L1298,290 L1375,372 L1440,318
-                     L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER MG — Snow-capped ridgeline
-          Fill: --snowline-blue (defining token for this section)
-          Angular ridge with snow-cap hints on each peak tip
-        -->
-        <div class="layer layer--mg" data-layer="mg" data-speed="0.40">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <!-- Main ridgeline -->
-            <path fill="var(--snowline-blue)"
-                  d="M0,900 L0,560 L58,507 L118,540 L178,474
-                     L238,518 L298,452 L358,500 L418,434
-                     L478,482 L538,418 L598,465 L658,402
-                     L718,450 L778,388 L838,435 L898,378
-                     L958,425 L1018,368 L1078,415 L1138,358
-                     L1198,405 L1258,352 L1318,398 L1378,355
-                     L1440,392 L1440,900 Z"/>
-            <!-- Snow cap highlights on major peaks (alpine-mist) -->
-            <path fill="var(--alpine-mist)" opacity="0.65"
-                  d="M538,418 L598,465 L578,448 L558,432 Z"/>
-            <path fill="var(--alpine-mist)" opacity="0.65"
-                  d="M658,402 L718,450 L698,432 L676,418 Z"/>
-            <path fill="var(--alpine-mist)" opacity="0.65"
-                  d="M778,388 L838,435 L818,418 L796,404 Z"/>
-            <path fill="var(--alpine-mist)" opacity="0.65"
-                  d="M898,378 L958,425 L938,408 L916,393 Z"/>
-            <path fill="var(--alpine-mist)" opacity="0.65"
-                  d="M1018,368 L1078,415 L1058,398 L1036,383 Z"/>
-            <path fill="var(--alpine-mist)" opacity="0.65"
-                  d="M1138,358 L1198,405 L1178,388 L1156,372 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER FG — Snow patches on ground, ice formations
-          Fill: --alpine-mist (light, the colour of fresh snow/ice)
-          Ice formation = thin vertical spike polygons (unique to this section)
-        -->
-        <div class="layer layer--fg" data-layer="fg" data-speed="0.85">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--alpine-mist)">
-              <!-- Snow field left -->
-              <path d="M0,900 L0,830
-                       C45,810 92,820 138,810
-                       C184,800 195,817 242,827
-                       C289,837 320,817 368,830 L368,900 Z"/>
-              <!-- Snow field right -->
-              <path d="M1072,900 L1072,822
-                       C1118,810 1165,820 1212,810
-                       C1259,800 1302,814 1350,824
-                       C1378,830 1414,820 1440,824 L1440,900 Z"/>
-              <!-- Center snow patch -->
-              <path d="M578,900 L578,846
-                       C614,834 655,842 695,834
-                       C735,826 756,840 792,847 L792,900 Z"/>
-              <!-- Ice formation spikes (unique shape vocabulary for snowline) -->
-              <polygon points="852,900 844,850 852,830 860,850"/>
-              <polygon points="878,900 869,856 878,833 887,856"/>
-              <polygon points="904,900 895,862 904,840 913,862"/>
-              <polygon points="930,900 921,852 930,831 939,852"/>
-              <polygon points="956,900 947,858 956,836 965,858"/>
-              <polygon points="982,900 973,848 982,826 991,848"/>
-              <!-- Scattered snow rocks -->
-              <ellipse cx="450" cy="882" rx="46" ry="23"/>
-              <ellipse cx="922" cy="878" rx="38" ry="19"/>
-              <ellipse cx="1022" cy="885" rx="32" ry="16"/>
-            </g>
-          </svg>
-        </div>
-
-      </div><!-- /#layers-snowline -->
-
-      <div class="scene__content scene__content--on-light">
-        <p class="scene__tag" aria-label="Stage 5 of 6, elevation 3800 metres">
-          <span class="scene__stage">Stage 05</span>
-          <span class="scene__sep" aria-hidden="true">·</span>
-          <span class="scene__elev">3,800<abbr class="scene__unit" title="metres">m</abbr></span>
-        </p>
-        <h2 class="scene__heading">The Snowline</h2>
-        <p class="scene__subheading">Permanent ice. The cold is structural now.</p>
-        <p class="scene__body">
-          The first patches appear in north-facing gullies, thin and hard.
-          By this altitude they are continuous.
-          Your footprints are the only ones today.
-          The rock beneath is glassy with old ice and the silence has a different quality —
-          less the absence of sound than the presence of something else entirely.
-          The peaks above are very clear, very close, and very far.
-        </p>
-      </div>
-    </section>
-
-
-    <!-- ╔══════════════════════════════════════════════════╗
-         ║  SCENE 6 · SUMMIT · 4,200m                     ║
-         ║  Mood: gold, pink, triumphant — the payoff      ║
-         ╚══════════════════════════════════════════════════╝ -->
-    <section class="scene scene--summit" id="scene-summit" aria-label="Stage 6 — Summit">
-
-      <div class="scene__layers" aria-hidden="true" id="layers-summit">
-
-        <!--
-          LAYER BG — Sunrise glow above the horizon
-          Fill: --summit-gold (the page's signature colour, deployed fully here)
-          Concentric glow ellipses + horizon band
-        -->
-        <div class="layer layer--bg" data-layer="bg" data-speed="0.15">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <g fill="var(--summit-gold)">
-              <!-- Rising sun glow, centered on horizon -->
-              <ellipse cx="720" cy="415" rx="198" ry="162"/>
-              <ellipse cx="720" cy="438" rx="318" ry="252" opacity="0.52"/>
-              <ellipse cx="720" cy="462" rx="505" ry="365" opacity="0.26"/>
-              <ellipse cx="720" cy="490" rx="720" ry="480" opacity="0.12"/>
-              <!-- Horizon glow band -->
-              <path opacity="0.38"
-                    d="M0,582 C240,560 480,572 720,550
-                       C960,528 1200,550 1440,535
-                       L1440,605 C1200,622 960,600 720,622
-                       C480,644 240,622 0,648 Z"/>
-            </g>
-          </svg>
-        </div>
-
-        <!--
-          LAYER MG — Distant peaks far below your position
-          Fill: --void-sky (dark peaks silhouetted against the gold sunrise sky)
-          Key difference from other sections: these peaks sit LOWER in the frame
-          (you are ABOVE them — this reads as looking DOWN at the mountain world)
-        -->
-        <div class="layer layer--mg" data-layer="mg" data-speed="0.40">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-            <path fill="var(--void-sky)"
-                  d="M0,900 L0,590
-                     L72,538 L148,570 L225,514 L302,558
-                     L378,500 L455,548 L532,490 L608,538
-                     L685,482 L762,528 L838,472 L915,520
-                     L992,465 L1068,512 L1145,458 L1222,505
-                     L1298,452 L1375,498 L1440,450
-                     L1440,900 Z"/>
-          </svg>
-        </div>
-
-        <!--
-          LAYER FG — Stone cairn + summit flag
-          Cairn: fill --void-sky (stacked rock ellipses)
-          Flag:  fill --summit-gold (ONLY use of gold in an FG layer)
-                 This gold flag is the visual full stop of the entire journey.
-        -->
-        <div class="layer layer--fg" data-layer="fg" data-speed="0.85">
-          <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-
-            <!-- CAIRN — stacked stone ellipses, widest at base -->
-            <g fill="var(--void-sky)">
-              <ellipse cx="720" cy="893" rx="54" ry="22"/><!-- base -->
-              <ellipse cx="720" cy="869" rx="43" ry="17"/>
-              <ellipse cx="720" cy="849" rx="34" ry="13"/>
-              <ellipse cx="720" cy="832" rx="26" ry="10"/>
-              <ellipse cx="720" cy="818" rx="18"  ry="7"/>
-              <ellipse cx="720" cy="807" rx="12"  ry="5"/>
-              <!-- Flag pole -->
-              <rect x="716" y="730" width="5" height="80"/>
-            </g>
-
-            <!-- FLAG — summit-gold, the journey's payoff -->
-            <polygon points="721,730 760,742 721,756"
-                     fill="var(--summit-gold)"/>
-
-          </svg>
-        </div>
-
-      </div><!-- /#layers-summit -->
-
-      <div class="scene__content">
-        <p class="scene__tag" aria-label="Summit reached, elevation 4200 metres">
-          <span class="scene__stage">Summit</span>
-          <span class="scene__sep" aria-hidden="true">·</span>
-          <span class="scene__elev">4,200<abbr class="scene__unit" title="metres">m</abbr></span>
-        </p>
-        <h2 class="scene__heading scene__heading--summit">The Summit</h2>
-        <p class="scene__subheading scene__subheading--summit">
-          Everything below is the world. You are above it.
-        </p>
-        <p class="scene__body">
-          The cairn is larger than expected, built by many hands over many years.
-          You add your stone. The horizon is so wide and so far below that it curves —
-          or you imagine it does. The sun, barely risen, turns the snowfield below
-          into hammered gold.
-          There is no wind at this exact moment.
-          You allow yourself to stand still.
-        </p>
-        <div class="summit-stats" aria-label="Trek statistics">
-          <div class="summit-stat">
-            <span class="summit-stat__value">3,000</span>
-            <span class="summit-stat__label">metres ascent</span>
-          </div>
-          <div class="summit-stat">
-            <span class="summit-stat__value">6</span>
-            <span class="summit-stat__label">stages</span>
-          </div>
-          <div class="summit-stat">
-            <span class="summit-stat__value">4,200</span>
-            <span class="summit-stat__label">metres altitude</span>
+      <!-- Altitude ticker (fixed position, driven by scroll) -->
+      <aside class="alt-hud" id="alt-hud" aria-label="Current altitude">
+        <span class="alt-hud__label">ALT</span>
+        <div class="alt-hud__track" role="progressbar" aria-valuemin="1200" aria-valuemax="4350" aria-valuenow="1200">
+          <div class="alt-hud__fill" id="alt-fill"></div>
+          <div class="alt-hud__marker" id="alt-marker">
+            <!-- Hiker SVG -->
+            <svg class="alt-hud__hiker" viewBox="0 0 20 30" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+              <circle cx="13" cy="4"  r="3.2"/>
+              <rect   x="5"  y="8"  width="5"   height="8"  rx="1"/>
+              <rect   x="9"  y="8"  width="4.5" height="8.5"/>
+              <polygon points="9.5,16.5 13,16.5 11,28 8,28"/>
+              <polygon points="11,16.5 14,16.5 15,28 12,28"/>
+              <rect   x="17.5" y="11" width="1.6" height="17" rx="0.8" transform="rotate(12 18.3 19.5)"/>
+            </svg>
           </div>
         </div>
+        <div class="alt-hud__readout">
+          <span id="alt-value">1,200</span><span class="alt-hud__unit">m</span>
+        </div>
+      </aside>
+
+      <div class="hero__glow hero__glow--amber" aria-hidden="true"></div>
+      <div class="hero__glow hero__glow--blue"  aria-hidden="true"></div>
+      <div class="hero__scroll-hint" aria-hidden="true">
+        <span class="hero__scroll-hint-text">Scroll</span>
+        <span class="hero__scroll-hint-arrow"></span>
       </div>
-    </section>
+    </header>
 
+    <!-- ══════════════════════════════════════════════════════
+         MAIN — 6 SCENES
+    ══════════════════════════════════════════════════════ -->
+    <main>
 
-  </main><!-- /#main -->
+      <!-- ── Scene 1: Forest ─────────────────────────────── -->
+      <section class="scene scene--forest" id="forest">
+        <div class="scene__layer scene__layer--back" data-speed="0.12">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800H1200V554.5L1045 514L898 574L718 484L562 564L398 494L231 584L0 534V800Z" fill="#4b5d3b" opacity="0.8"/>
+            <path d="M0 800H1200V656L1045 619L898 679L718 589L562 669L398 599L231 689L0 639V800Z" fill="#263828" opacity="0.9"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--mid" data-speed="0.28">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800H1200V709L1090 689L985.5 724L854.5 669L748 714L600 649L450 714L313 654L151.5 729L0 694V800Z" fill="#2b4a24"/>
+            <path d="M-10 800L15 755L40 800H-10ZM180 800L205 730L230 800H180ZM370 800L395 755L420 800H370ZM530 800L555 730L580 800H530ZM720 800L745 755L770 800H720ZM860 800L885 730L910 800H860ZM1040 800L1065 755L1090 800H1040Z" fill="#1d2f1a"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--front" data-speed="0.45">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800H1200V749L1090 729L985.5 764L854.5 709L748 754L600 689L450 754L313 694L151.5 769L0 734V800Z" fill="#14210f"/>
+            <circle cx="1030" cy="120" r="48" fill="#f4b44d" opacity="0.75"/>
+          </svg>
+        </div>
+        <div class="scene__content">
+          <div class="scene__card">
+            <p class="scene__tag">Stage 01 · Forest Base</p>
+            <h2>The Trailhead</h2>
+            <p class="scene__subheading">Where the forest swallows the path.</p>
+            <p class="scene__body">The scent of pine and damp earth welcomes you into the first stretch of the journey.</p>
+            <div class="scene__meta">
+              <span class="scene__stat"><strong>1,200</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> 12°C</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      <!-- ── Scene 2: Waterfall ──────────────────────────── -->
+      <section class="scene scene--waterfall" id="waterfall">
+        <div class="scene__layer scene__layer--back" data-speed="0.12">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="1200" height="800" fill="#8bc3d2"/>
+            <path d="M1200 800V480L940 420L750 500L560 410L390 510L210 440L0 530V800H1200Z" fill="#5a7b89"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--mid" data-speed="0.26">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M1200 800V605L990 565L840 645L670 565L500 655L340 595L180 665L0 620V800H1200Z" fill="#3f6172"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--front" data-speed="0.42">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M1200 800V720.5L941.5 680.5L702 730.5L482.5 695.5L262 757.5L0 727.5V800H1200Z" fill="#22343e"/>
+            <path d="M362.5 800C432.5 660 512.5 610 582.5 620C672.5 635 732.5 710 842.5 800" stroke="#eaf7ff" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="scene__content">
+          <div class="scene__card scene__card--light">
+            <p class="scene__tag">Stage 02 · Waterfall</p>
+            <h2>The River Opens</h2>
+            <p class="scene__subheading">The trail turns to spray and silver light.</p>
+            <p class="scene__body">The canyon grows louder with each step, and the air feels sharper and brighter.</p>
+            <div class="scene__meta">
+              <span class="scene__stat"><strong>1,850</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> 8°C</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <!-- GSAP 3 + ScrollTrigger — Phase 4 (parallax mechanics) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+      <!-- ── Scene 3: Cliff ──────────────────────────────── -->
+      <section class="scene scene--cliff" id="cliff">
+        <div class="scene__layer scene__layer--back" data-speed="0.11">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="1200" height="800" fill="#6a737e"/>
+            <path d="M0 800V560L170 430L320 500L470 370L650 470L830 350L1010 480L1200 420V800H0Z" fill="#4c525c" opacity="0.75"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--mid" data-speed="0.24">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V650L160 580L240 610L330 540L450 620L570 500L730 610L910 560L1090 640L1200 610V800H0Z" fill="#2f3640"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--front" data-speed="0.38">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V701.5L240.5 681.5L482.5 725L720.5 658L960 745L1200 701.5V800H0Z" fill="#14181f"/>
+          </svg>
+        </div>
+        <div class="scene__content">
+          <div class="scene__card">
+            <p class="scene__tag">Stage 03 · Cliff Bridge</p>
+            <h2>Over the Edge</h2>
+            <p class="scene__subheading">A narrow crossing suspended above the valley.</p>
+            <p class="scene__body">The bridge feels thin and delicate, but the view makes every step worth it.</p>
+            <div class="scene__meta">
+              <span class="scene__stat"><strong>2,600</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> 3°C</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <!-- Lenis smooth scroll — Phase 4 (smooth-scroll base feel) -->
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+      <!-- ── Scene 4: Snow ───────────────────────────────── -->
+      <section class="scene scene--snow" id="snow">
+        <div class="scene__layer scene__layer--back" data-speed="0.1">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="1200" height="800" fill="#d7e7f2"/>
+            <path d="M0 800V540L150 450L260 520L380 400L540 500L640 360L810 520L980 420L1200 500V800H0Z" fill="#8aa7bb" opacity="0.85"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--mid" data-speed="0.22">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V620L220 500L350 580L520 450L710 570L920 450L1200 560V800H0Z" fill="#5f7f97"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--front" data-speed="0.36">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V706L220 676L435 736L660 676L885 736L1200 706V800H0Z" fill="#253746"/>
+            <path d="M662.5 800C692.5 720 742.5 680 822.5 680C902.5 680 942.5 740 942.5 800" stroke="#f3f8fc" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="scene__content">
+          <div class="scene__card scene__card--light">
+            <p class="scene__tag">Stage 04 · Snowline</p>
+            <h2>The Cold Opens</h2>
+            <p class="scene__subheading">The world turns pale, bright, and precise.</p>
+            <p class="scene__body">Snow catches the light and every edge feels sharper than before.</p>
+            <div class="scene__meta">
+              <span class="scene__stat"><strong>3,200</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> −4°C</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <script src="js/main.js"></script>
+      <!-- ── Scene 5: Night ──────────────────────────────── -->
+      <section class="scene scene--night" id="night">
+        <div class="scene__layer scene__layer--back" data-speed="0.09">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="1200" height="800" fill="#07131e"/>
+            <circle cx="900" cy="180" r="80" fill="#f5c76a" opacity="0.75"/>
+            <!-- Stars -->
+            <circle cx="100" cy="60"  r="1.5" fill="#fff" opacity="0.7"/>
+            <circle cx="230" cy="90"  r="1"   fill="#fff" opacity="0.6"/>
+            <circle cx="370" cy="40"  r="1.5" fill="#fff" opacity="0.8"/>
+            <circle cx="520" cy="110" r="1"   fill="#fff" opacity="0.5"/>
+            <circle cx="650" cy="70"  r="2"   fill="#fff" opacity="0.7"/>
+            <circle cx="760" cy="30"  r="1"   fill="#fff" opacity="0.9"/>
+            <circle cx="400" cy="170" r="1.5" fill="#fff" opacity="0.6"/>
+            <circle cx="160" cy="200" r="1"   fill="#fff" opacity="0.5"/>
+            <circle cx="580" cy="200" r="1.5" fill="#fff" opacity="0.8"/>
+            <path d="M0 800V560L160 500L310 560L500 440L740 560L960 470L1200 530V800H0Z" fill="#1b2e3d"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--mid" data-speed="0.2">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V650L200 580L320 640L540 500L740 620L980 540L1200 600V800H0Z" fill="#23384d"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--front" data-speed="0.34">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V706L220 676L435 736L660 676L885 736L1200 706V800H0Z" fill="#02060b"/>
+          </svg>
+        </div>
+        <div class="scene__content">
+          <div class="scene__card">
+            <p class="scene__tag">Stage 05 · Night Camp</p>
+            <h2>Under the Stars</h2>
+            <p class="scene__subheading">The mountain becomes quiet and immense.</p>
+            <p class="scene__body">Campfire glow, cold air, and a sky full of light make the world feel close and far at once.</p>
+            <div class="scene__meta">
+              <span class="scene__stat"><strong>3,900</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> −11°C</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-</body>
+      <!-- ── Scene 6: Summit ─────────────────────────────── -->
+      <section class="scene scene--summit" id="summit">
+        <div class="scene__layer scene__layer--back" data-speed="0.08">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="1200" height="800" fill="#ffce76"/>
+            <path d="M0 560L200 460L360 530L520 400L690 520L860 430L1200 520V800H0V560Z" fill="#c6802a" opacity="0.8"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--mid" data-speed="0.2">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 630L180 540L300 590L470 480L640 600L830 490L1200 610V800H0V630Z" fill="#4a2f14"/>
+          </svg>
+        </div>
+        <div class="scene__layer scene__layer--front" data-speed="0.34">
+          <svg preserveAspectRatio="xMidYMax meet" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0 800V706C80 676 146.5 676 220 706C293.5 736 356.5 736 435 706C513.5 676 580 676 660 706C740 736 813.5 736 885 706C956.5 676 1035 676 1200 706V800H0Z" fill="#16110d"/>
+          </svg>
+        </div>
+        <div class="scene__content">
+          <div class="scene__card scene__card--summit">
+            <p class="scene__tag">Stage 06 · Summit</p>
+            <h2>The Summit</h2>
+            <p class="scene__subheading">Everything below becomes a map.</p>
+            <p class="scene__body">The final view feels earned — a wide, bright horizon and the reward of reaching the top.</p>
+            <div class="scene__meta scene__meta--summit">
+              <span class="scene__stat"><strong>4,350</strong>m</span>
+              <span class="scene__stat"><strong>Temp</strong> −18°C</span>
+              <span class="scene__stat"><strong>Wind</strong> 42 km/h</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ══════════════════════════════════════════════════════
+         FOOTER
+    ══════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <p class="footer__credit">Built with care &amp; scroll magic</p>
+      <a href="#top" class="footer__back">↑ Back to top</a>
+    </footer>
+
+    <script src="js/main.js"></script>
+  </body>
 </html>
