@@ -1,24 +1,10 @@
 'use strict';
 
-/*
-  ANIMATION + PERFORMANCE OPTIMISATIONS:
-  1. IntersectionObserver for scene content reveal — no scroll math per frame
-  2. IntersectionObserver for nav-dot active state — no getBoundingClientRect per frame
-  3. IntersectionObserver to PAUSE star canvas RAF when hero off-screen
-  4. Progress bar: scaleX (compositor-thread, no layout cost)
-  5. Batch ALL getBoundingClientRect reads before ANY writes (avoid layout thrash)
-  6. Cursor glow: lerp-smoothed, paused on hidden tab + touch devices
-  7. Debounced resize handler (150ms) with one-shot recalc
-  8. visibilitychange → pause all RAF loops when tab hidden
-  9. passive:true on all scroll/touch/pointer listeners
-  10. will-change only on actually-animated elements
-*/
-
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ── Constants ─────────────────────────────────────────────── */
-  const ALT_MIN   = 1200;
-  const ALT_MAX   = 4350;
+  const ALT_MIN   = 2860;
+  const ALT_MAX   = 5644;
   const REDUCED   = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   const HAS_HOVER = window.matchMedia('(hover:hover)').matches;
 
@@ -32,25 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const navDots       = Array.from(document.querySelectorAll('.nav-dot'));
   const scenes        = Array.from(document.querySelectorAll('.scene'));
   const sceneContents = Array.from(document.querySelectorAll('.scene__content'));
+  const photoLayers   = Array.from(document.querySelectorAll('.scene__photo'));
+  const trekkers      = Array.from(document.querySelectorAll('.scene__trekker'));
   const heroEl        = document.querySelector('.hero');
   const heroStars     = document.getElementById('hero-stars');
   const ctaBtn        = document.getElementById('cta-start');
 
-  // All anchor sections for nav-dot tracking
   const sectionIds = ['top','forest','waterfall','cliff','snow','night','summit'];
   const sections   = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
 
   /* ═══════════════════════════════════════════════════════════
-     1. STAR CANVAS
-     ─ Paused by IntersectionObserver when hero is off-screen
-     ─ Paused by visibilitychange when tab is hidden
-     ─ Resize debounced 200ms
+     1. STAR CANVAS (hero background)
   ═══════════════════════════════════════════════════════════ */
   let starRaf = null;
 
   if (heroStars && !REDUCED) {
     const ctx = heroStars.getContext('2d');
-    let stars  = [];
+    let stars = [];
 
     function resizeCanvas() {
       heroStars.width  = heroStars.offsetWidth;
@@ -75,8 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawStars(t) {
       ctx.clearRect(0, 0, heroStars.width, heroStars.height);
-      const len = stars.length;
-      for (let i = 0; i < len; i++) {
+      for (let i = 0; i < stars.length; i++) {
         const s = stars[i];
         const a = s.alpha * (0.65 + 0.35 * Math.sin(t * s.speed + s.phase));
         ctx.beginPath();
@@ -88,35 +71,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startStars() {
       if (starRaf !== null || document.hidden) return;
-      const tick = (t) => {
-        drawStars(t / 1000);
-        starRaf = requestAnimationFrame(tick);
-      };
+      const tick = (t) => { drawStars(t / 1000); starRaf = requestAnimationFrame(tick); };
       starRaf = requestAnimationFrame(tick);
     }
-
     function stopStars() {
-      if (starRaf !== null) {
-        cancelAnimationFrame(starRaf);
-        starRaf = null;
-      }
+      if (starRaf !== null) { cancelAnimationFrame(starRaf); starRaf = null; }
     }
 
-    // Pause/resume based on hero visibility
-    new IntersectionObserver((entries) => {
-      entries[0].isIntersecting ? startStars() : stopStars();
-    }, { threshold: 0.05 }).observe(heroEl);
+    new IntersectionObserver(
+      (entries) => { entries[0].isIntersecting ? startStars() : stopStars(); },
+      { threshold: 0.05 }
+    ).observe(heroEl);
 
-    // Pause/resume based on tab visibility
     document.addEventListener('visibilitychange', () => {
       document.hidden ? stopStars() : startStars();
     });
 
-    // Resize (debounced)
-    let starResizeTimer;
+    let starResizeT;
     window.addEventListener('resize', () => {
-      clearTimeout(starResizeTimer);
-      starResizeTimer = setTimeout(resizeCanvas, 200);
+      clearTimeout(starResizeT);
+      starResizeT = setTimeout(resizeCanvas, 200);
     }, { passive: true });
 
     resizeCanvas();
@@ -125,9 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ═══════════════════════════════════════════════════════════
      2. CURSOR GLOW
-     ─ Only on pointer/hover devices
-     ─ lerp-smoothed at 8% per frame
-     ─ Paused when tab hidden
   ═══════════════════════════════════════════════════════════ */
   if (cursorGlow && HAS_HOVER && !REDUCED) {
     let mx = window.innerWidth / 2, my = window.innerHeight / 2;
@@ -135,8 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let glowRaf = null;
 
     document.addEventListener('mousemove', (e) => {
-      mx = e.clientX;
-      my = e.clientY;
+      mx = e.clientX; my = e.clientY;
     }, { passive: true });
 
     function startGlow() {
@@ -150,63 +120,60 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       glowRaf = requestAnimationFrame(tick);
     }
-
     function stopGlow() {
-      if (glowRaf !== null) {
-        cancelAnimationFrame(glowRaf);
-        glowRaf = null;
-      }
+      if (glowRaf !== null) { cancelAnimationFrame(glowRaf); glowRaf = null; }
     }
 
     document.addEventListener('visibilitychange', () => {
       document.hidden ? stopGlow() : startGlow();
     });
-
     startGlow();
   }
 
   /* ═══════════════════════════════════════════════════════════
      3. CONTENT REVEAL — IntersectionObserver
-     ─ Each .scene__content fades in once when ≥12% visible
-     ─ Once revealed it's never hidden again → unobserve
-     ─ rootMargin -60px pushes trigger slightly inside viewport
-     ─ Fallback: classList.add immediately if IO not supported
   ═══════════════════════════════════════════════════════════ */
   if ('IntersectionObserver' in window && !REDUCED) {
-    const revealIO = new IntersectionObserver((entries, obs) => {
+    const io = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          obs.unobserve(entry.target); // done — remove from observation list
+          obs.unobserve(entry.target);
         }
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
 
-    sceneContents.forEach(c => revealIO.observe(c));
+    sceneContents.forEach(c => io.observe(c));
   } else {
     sceneContents.forEach(c => c.classList.add('is-visible'));
   }
 
   /* ═══════════════════════════════════════════════════════════
-     4. NAV DOTS — IntersectionObserver (no scroll math)
-     ─ Tracks which section occupies >40% of viewport
-     ─ Isolated from the scroll update loop entirely
+     4. NAV DOTS — IntersectionObserver
   ═══════════════════════════════════════════════════════════ */
   if (navDots.length && 'IntersectionObserver' in window) {
-    const sectionMap = new Map(
-      sections.map((sec, i) => [sec, i])
-    );
+    const sMap = new Map(sections.map((s, i) => [s, i]));
+    new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = sMap.get(e.target) ?? -1;
+          navDots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+        }
+      });
+    }, { threshold: 0.4 }).observe(sections.forEach ? undefined : sections[0]);
 
+    // Correct observer setup
     const navIO = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const idx = sectionMap.get(entry.target) ?? -1;
-          navDots.forEach((dot, i) => dot.classList.toggle('is-active', i === idx));
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = sMap.get(e.target) ?? -1;
+          if (idx !== -1) {
+            navDots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+          }
         }
       });
     }, { threshold: 0.4 });
-
-    sections.forEach(sec => navIO.observe(sec));
+    sections.forEach(s => navIO.observe(s));
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -218,13 +185,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let maxScroll = document.documentElement.scrollHeight - vh;
 
   /* ═══════════════════════════════════════════════════════════
-     6. ALTITUDE HUD helpers
+     6. UTILS
   ═══════════════════════════════════════════════════════════ */
   const lerp  = (a, b, t) => a + (b - a) * t;
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
+  /* ═══════════════════════════════════════════════════════════
+     7. ALTITUDE HUD
+  ═══════════════════════════════════════════════════════════ */
   function updateHUD(progress) {
-    if (!altFill && !altMarker && !altValue) return;
+    if (!altFill || !altValue) return;
     const pct = (progress * 100).toFixed(2);
     const alt = Math.round(lerp(ALT_MIN, ALT_MAX, progress));
     if (altFill)   altFill.style.height   = `${pct}%`;
@@ -234,19 +204,46 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     7. MAIN SCROLL UPDATE — batched reads → writes
-     ─ All getBoundingClientRect calls happen BEFORE any style
-       write to prevent forced synchronous layouts
+     8. TREKKER WALK LOGIC
+     Each section has its own trekker. As the section scrolls
+     through the viewport, the trekker moves from left (~8%)
+     to right (~72%) of the scene width — so they appear to
+     walk across the landscape as you scroll down.
+  ═══════════════════════════════════════════════════════════ */
+  function updateTrekker(trekker, sectionRect) {
+    if (!trekker || REDUCED) return;
+
+    // "progress" = how far the section has scrolled through the viewport
+    // 0 = section bottom just entering from below
+    // 1 = section top has just left the top
+    const sectionH = sectionRect.height;
+    const entered  = vh - sectionRect.top;   // pixels of section visible from top
+    const progress = clamp(entered / (sectionH + vh), 0, 1);
+
+    // Trekker walks from 8% to 68% of scene width
+    const startPct = 8;
+    const endPct   = 68;
+    const xPct     = lerp(startPct, endPct, progress);
+
+    trekker.style.left = `${xPct.toFixed(2)}%`;
+
+    // Subtle vertical bob driven by scroll speed (parallax feel)
+    const bobY = Math.sin(progress * Math.PI * 6) * 3;
+    trekker.style.transform = `translateY(${bobY.toFixed(1)}px)`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     9. MAIN UPDATE LOOP — batched reads → writes
   ═══════════════════════════════════════════════════════════ */
   function updateDOM() {
     const progress = maxScroll > 0 ? clamp(scrollY / maxScroll, 0, 1) : 0;
 
-    // ── READ PHASE (all at once) ──────────────────────────────
-    const sceneRects = REDUCED ? [] : scenes.map(s => s.getBoundingClientRect());
+    // ── BATCH READS ──────────────────────────────────────────
+    const sceneRects = scenes.map(s => s.getBoundingClientRect());
 
-    // ── WRITE PHASE ───────────────────────────────────────────
+    // ── BATCH WRITES ─────────────────────────────────────────
 
-    // Progress bar (scaleX — compositor thread, zero layout cost)
+    // Progress bar (scaleX — compositor thread)
     if (progressFill) {
       progressFill.style.transform = `scaleX(${progress.toFixed(4)})`;
     }
@@ -254,22 +251,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Altitude HUD
     updateHUD(progress);
 
-    // Parallax layers
-    if (!REDUCED) {
-      scenes.forEach((scene, i) => {
-        const distToBot = sceneRects[i].top - vh;
-        scene.querySelectorAll('.scene__layer').forEach(layer => {
-          const speed = parseFloat(layer.dataset.speed || '0.2');
-          layer.style.transform = `translate3d(0,${(distToBot * speed * 0.18).toFixed(2)}px,0)`;
-        });
-      });
-    }
+    // Photo parallax + trekker walk
+    scenes.forEach((scene, i) => {
+      const rect      = sceneRects[i];
+      const distToTop = rect.top;   // negative once scene has scrolled past top
+
+      // Photo layer parallax (slower than scroll = depth illusion)
+      if (!REDUCED && photoLayers[i]) {
+        const speed = parseFloat(scene.querySelector('.scene__photo')?.dataset.speed || '0.2');
+        // Move the photo upward more slowly than the page scrolls
+        const offset = -distToTop * speed;
+        photoLayers[i].style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
+      }
+
+      // Trekker
+      if (trekkers[i]) {
+        updateTrekker(trekkers[i], rect);
+      }
+    });
 
     isTicking = false;
   }
 
   /* ═══════════════════════════════════════════════════════════
-     8. EVENT LISTENERS
+     10. EVENT LISTENERS
   ═══════════════════════════════════════════════════════════ */
   window.addEventListener('scroll', () => {
     scrollY = window.scrollY;
@@ -279,7 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // Debounced resize — recalc scroll metrics once, then re-run updateDOM
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
@@ -292,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { passive: true });
 
   /* ═══════════════════════════════════════════════════════════
-     9. HERO CTA — pulse ring on hover (pointer only)
+     11. HERO CTA pulse
   ═══════════════════════════════════════════════════════════ */
   if (ctaBtn && HAS_HOVER) {
     ctaBtn.addEventListener('mouseenter', () => {
@@ -304,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     10. INITIAL RENDER
+     12. INITIAL RENDER
   ═══════════════════════════════════════════════════════════ */
   updateDOM();
 });

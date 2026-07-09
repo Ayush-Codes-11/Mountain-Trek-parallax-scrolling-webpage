@@ -1,11 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   JOURNEY TO THE SUMMIT — Optimized CSS
-   • Progress bar uses transform:scaleX (compositor, no layout thrash)
-   • Scene reveal uses opacity-only (no transform conflict with JS)
-   • contain:layout on scenes isolates repaints
-   • Proper 3-breakpoint mobile stack (480 / 640 / 768)
-   • Touch targets ≥ 44px, full-width CTA on small screens
-   • Reduced-motion: all keyframe + transition animations suppressed
+   EVEREST BASE CAMP TREK — Photo Parallax CSS
+   Real photography backgrounds + animated trekker figure
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── 0. Design tokens ────────────────────────────────────────── */
@@ -14,8 +9,8 @@
   --text:         #f0ece4;
   --text-muted:   rgba(240,236,228,0.62);
   --accent:       #f2b24e;
-  --panel-dark:   rgba(6,10,15,0.72);
-  --panel-light:  rgba(248,244,236,0.88);
+  --panel-dark:   rgba(6,10,15,0.75);
+  --panel-light:  rgba(248,244,236,0.90);
   --border-dark:  rgba(255,255,255,0.10);
   --border-light: rgba(0,0,0,0.12);
   --radius-card:  1.25rem;
@@ -34,20 +29,14 @@ body {
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
-  /* Prevent elastic overscroll interfering with parallax on iOS */
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 a { color:inherit; text-decoration:none; }
-img,svg { display:block; max-width:100%; }
+img { display:block; max-width:100%; }
 
-/* ── 2. Scroll progress bar ──────────────────────────────────── */
-/*
-  KEY PERF WIN: width → transform:scaleX
-  scaleX runs on the GPU compositor thread — zero layout/paint cost.
-  The element stays full-width; scaleX clips it visually.
-*/
+/* ── 2. Progress bar ─────────────────────────────────────────── */
 .progress-bar {
   position: fixed;
   inset: 0 0 auto 0;
@@ -58,39 +47,37 @@ img,svg { display:block; max-width:100%; }
 .progress-bar span {
   display: block;
   height: 100%;
-  width: 100%;                  /* always full-width */
-  transform: scaleX(0);         /* JS drives this via scaleX(progress) */
+  width: 100%;
+  transform: scaleX(0);
   transform-origin: left center;
-  background: linear-gradient(90deg, #f2b24e, #ffd980, #f2b24e);
+  background: linear-gradient(90deg,#f2b24e,#ffd980,#f2b24e);
   background-size: 300% 100%;
   animation: shimmer-bar 2.4s linear infinite;
-  will-change: transform;       /* promote to compositor layer */
+  will-change: transform;
 }
 @keyframes shimmer-bar {
   0%   { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
 
-/* ── 3. Cursor glow (desktop / pointer device only) ─────────── */
+/* ── 3. Cursor glow ──────────────────────────────────────────── */
 .cursor-glow {
   position: fixed;
-  width: 340px;
-  height: 340px;
+  width: 340px; height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(242,178,78,0.12), transparent 70%);
+  background: radial-gradient(circle,rgba(242,178,78,0.10),transparent 70%);
   pointer-events: none;
   z-index: 1;
   transform: translate(-50%,-50%);
   opacity: 0;
-  will-change: left, top;
+  will-change: left,top;
 }
 @media (hover:hover) { .cursor-glow { opacity:1; } }
 
 /* ── 4. Nav dots ─────────────────────────────────────────────── */
 .nav-dots {
   position: fixed;
-  right: 1.5rem;
-  top: 50%;
+  right: 1.5rem; top: 50%;
   transform: translateY(-50%);
   z-index: 150;
   display: flex;
@@ -100,22 +87,18 @@ img,svg { display:block; max-width:100%; }
 }
 .nav-dot {
   display: block;
-  width: 7px;
-  height: 7px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: rgba(255,255,255,0.28);
   border: 1.5px solid rgba(255,255,255,0.22);
   transition: background 0.25s, transform 0.25s, border-color 0.25s;
   position: relative;
-  /* Larger hit area without changing visual size */
-  padding: 6px;
-  margin: -6px;
+  padding: 6px; margin: -6px;
 }
 .nav-dot::after {
   content: attr(data-label);
   position: absolute;
-  right: calc(100% + 10px);
-  top: 50%;
+  right: calc(100% + 10px); top: 50%;
   transform: translateY(-50%);
   font-family: var(--font-mono);
   font-size: 0.62rem;
@@ -127,8 +110,7 @@ img,svg { display:block; max-width:100%; }
   transition: opacity 0.2s;
 }
 .nav-dot:hover::after { opacity:0.7; }
-.nav-dot:hover,
-.nav-dot.is-active {
+.nav-dot:hover, .nav-dot.is-active {
   background: var(--accent);
   border-color: var(--accent);
   transform: scale(1.5);
@@ -137,8 +119,7 @@ img,svg { display:block; max-width:100%; }
 /* ── 5. Altitude HUD ─────────────────────────────────────────── */
 .alt-hud {
   position: fixed;
-  left: 1.5rem;
-  top: 50%;
+  left: 1.5rem; top: 50%;
   transform: translateY(-50%);
   z-index: 150;
   display: flex;
@@ -156,8 +137,7 @@ img,svg { display:block; max-width:100%; }
   color: rgba(240,236,228,0.35);
 }
 .alt-hud__track {
-  width: 2px;
-  height: var(--hud-height);
+  width: 2px; height: var(--hud-height);
   background: rgba(240,236,228,0.12);
   border-radius: 1px;
   position: relative;
@@ -166,23 +146,20 @@ img,svg { display:block; max-width:100%; }
 .alt-hud__fill {
   position: absolute;
   bottom:0; left:0;
-  width: 100%;
-  height: 0%;
-  background: linear-gradient(to top, var(--accent), rgba(242,178,78,0.3));
+  width: 100%; height: 0%;
+  background: linear-gradient(to top,var(--accent),rgba(242,178,78,0.3));
   border-radius: 1px;
   will-change: height;
 }
 .alt-hud__marker {
   position: absolute;
-  bottom: 0%;
-  left: 50%;
+  bottom: 0%; left: 50%;
   transform: translateX(-50%);
   will-change: bottom;
 }
 .alt-hud__hiker {
   display: block;
-  width: 16px;
-  height: 24px;
+  width: 16px; height: 24px;
   color: var(--accent);
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
   animation: hike-bob 0.9s ease-in-out infinite alternate;
@@ -200,230 +177,269 @@ img,svg { display:block; max-width:100%; }
   align-items: baseline;
   gap: 1px;
 }
-.alt-hud__unit {
-  font-size: 0.5rem;
-  opacity: 0.6;
-}
+.alt-hud__unit { font-size:0.5rem; opacity:0.6; }
 
 /* ── 6. HERO ─────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  min-height: 100svh;  /* svh = small viewport height — correct on mobile browsers */
+  min-height: 100svh;
   display: grid;
   place-items: center;
   padding: clamp(1rem,4vw,2rem);
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 80% 20%, rgba(242,178,78,0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 80%, rgba(60,110,180,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%,rgba(242,178,78,0.15) 0%,transparent 50%),
+    radial-gradient(ellipse at 20% 80%,rgba(60,110,180,0.12) 0%,transparent 50%),
     linear-gradient(160deg,#0c1620 0%,#0d1a24 40%,#070c10 100%);
 }
-.hero__stars {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
+.hero__stars { position:absolute; inset:0; width:100%; height:100%; }
 .hero__content {
-  position: relative;
-  z-index: 2;
-  max-width: 46rem;
-  text-align: center;
-  padding: 0 1rem;
+  position: relative; z-index:2;
+  max-width: 46rem; text-align:center; padding: 0 1rem;
 }
 .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
+  display: inline-flex; align-items:center; gap:0.7rem;
   font-family: var(--font-mono);
   font-size: clamp(0.6rem,1.5vw,0.72rem);
   font-weight: 500;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
+  letter-spacing: 0.26em; text-transform: uppercase;
   color: var(--accent);
   margin-bottom: clamp(1rem,3vh,1.6rem);
   opacity: 0;
   animation: fade-up 0.8s var(--ease-out) 0.2s forwards;
 }
 .eyebrow__line {
-  display: inline-block;
-  width: 32px;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.6;
-  flex-shrink: 0;
+  display: inline-block; width:32px; height:1px;
+  background: var(--accent); opacity:0.6; flex-shrink:0;
 }
 .hero__title {
   font-family: var(--font-display);
   font-weight: 700;
-  /* clamp: min 2.4rem (small phone) → 9vw → max 8rem */
   font-size: clamp(2.4rem,9vw,8rem);
   line-height: 0.92;
   letter-spacing: -0.02em;
   margin-bottom: clamp(1rem,3vh,1.6rem);
-  display: flex;
-  flex-direction: column;
-  gap: 0.04em;
+  display: flex; flex-direction:column; gap:0.04em;
 }
 .hero__title-line {
-  display: block;
-  opacity: 0;
+  display: block; opacity:0;
   transform: translateY(40px);
-  will-change: opacity, transform;
+  will-change: opacity,transform;
 }
 .hero__title-line:nth-child(1) { animation: fade-up 0.9s var(--ease-out) 0.4s  forwards; }
 .hero__title-line:nth-child(2) { animation: fade-up 0.9s var(--ease-out) 0.55s forwards; }
 .hero__title-line:nth-child(3) { animation: fade-up 0.9s var(--ease-out) 0.7s  forwards; }
-.hero__title-line--accent {
-  color: var(--accent);
-  font-style: italic;
-  font-size: 0.6em;
-  font-weight: 300;
-}
-@keyframes fade-up {
-  to { opacity:1; transform:translateY(0); }
-}
+.hero__title-line--accent { color:var(--accent); font-style:italic; font-size:0.6em; font-weight:300; }
+@keyframes fade-up { to { opacity:1; transform:translateY(0); } }
 .hero__lead {
   font-size: clamp(0.92rem,1.8vw,1.12rem);
-  line-height: 1.8;
-  color: var(--text-muted);
-  max-width: 36rem;
-  margin: 0 auto clamp(1.4rem,4vh,2rem);
-  opacity: 0;
-  animation: fade-up 0.9s var(--ease-out) 0.85s forwards;
+  line-height: 1.8; color: var(--text-muted);
+  max-width: 36rem; margin: 0 auto clamp(1.4rem,4vh,2rem);
+  opacity:0; animation: fade-up 0.9s var(--ease-out) 0.85s forwards;
 }
 .hero__actions {
-  display: flex;
-  gap: 0.85rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: fade-up 0.9s var(--ease-out) 1s forwards;
+  display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap;
+  opacity:0; animation: fade-up 0.9s var(--ease-out) 1s forwards;
 }
 .hero__cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0 1.7rem;
-  height: 52px;            /* explicit height = reliable touch target */
-  border-radius: 999px;
-  background: var(--accent);
-  color: #1a0d00;
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+  display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+  padding:0 1.7rem; height:52px; border-radius:999px;
+  background: var(--accent); color:#1a0d00;
+  font-weight:700; font-size:0.95rem; letter-spacing:0.02em;
+  transition: transform 0.2s var(--ease-out),box-shadow 0.2s;
 }
-.hero__cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(242,178,78,0.35);
-}
-.hero__cta:active { transform: translateY(0); }
+.hero__cta:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(242,178,78,0.35); }
+.hero__cta:active { transform:translateY(0); }
 .hero__ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 1.7rem;
-  height: 52px;
-  border-radius: 999px;
-  border: 1px solid var(--border-dark);
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  transition: border-color 0.2s, color 0.2s;
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:0 1.7rem; height:52px; border-radius:999px;
+  border:1px solid var(--border-dark);
+  font-size:0.95rem; color:var(--text-muted);
+  transition: border-color 0.2s,color 0.2s;
 }
-.hero__ghost:hover {
-  border-color: rgba(255,255,255,0.3);
-  color: var(--text);
-}
-/* Ambient glows */
+.hero__ghost:hover { border-color:rgba(255,255,255,0.3); color:var(--text); }
 .hero__glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  will-change: transform;
+  position:absolute; border-radius:50%;
+  pointer-events:none; will-change:transform;
 }
 .hero__glow--amber {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(242,178,78,0.22), transparent 70%);
-  top: -10%; right: -8%;
-  filter: blur(20px);
+  width:500px; height:500px;
+  background: radial-gradient(circle,rgba(242,178,78,0.22),transparent 70%);
+  top:-10%; right:-8%; filter:blur(20px);
   animation: glow-drift 8s ease-in-out infinite alternate;
 }
 .hero__glow--blue {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(60,120,220,0.14), transparent 70%);
-  bottom: -5%; left: -5%;
-  filter: blur(24px);
+  width:400px; height:400px;
+  background: radial-gradient(circle,rgba(60,120,220,0.14),transparent 70%);
+  bottom:-5%; left:-5%; filter:blur(24px);
   animation: glow-drift 10s ease-in-out infinite alternate-reverse;
 }
 @keyframes glow-drift {
-  0%   { transform: translate(0,0); }
-  100% { transform: translate(30px,20px); }
+  0%   { transform:translate(0,0); }
+  100% { transform:translate(30px,20px); }
 }
-/* Scroll hint */
 .hero__scroll-hint {
-  position: absolute;
-  bottom: clamp(1.2rem,3vh,2.2rem);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  opacity: 0;
-  animation: fade-up 1s var(--ease-out) 1.4s forwards;
+  position:absolute; bottom:clamp(1.2rem,3vh,2.2rem); left:50%;
+  transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:0.4rem;
+  opacity:0; animation: fade-up 1s var(--ease-out) 1.4s forwards;
 }
 .hero__scroll-hint-text {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  font-family:var(--font-mono); font-size:0.6rem;
+  letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted);
 }
 .hero__scroll-hint-arrow {
-  display: block;
-  width: 1px;
-  height: 36px;
-  background: linear-gradient(to bottom, var(--text-muted), transparent);
+  display:block; width:1px; height:36px;
+  background: linear-gradient(to bottom,var(--text-muted),transparent);
   animation: pulse-down 1.8s ease-in-out infinite;
 }
 @keyframes pulse-down {
-  0%,100% { transform:scaleY(1);   opacity:0.5; }
-  50%      { transform:scaleY(1.3); opacity:1;   }
+  0%,100% { transform:scaleY(1); opacity:0.5; }
+  50%      { transform:scaleY(1.3); opacity:1; }
 }
 
-/* ── 7. Scenes ───────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   7. SCENES  — photo-based parallax
+═══════════════════════════════════════════════════════════════ */
 .scene {
   position: relative;
   min-height: 110vh;
   overflow: hidden;
-  /* Isolate repaints — prevents parallax layers from dirtying
-     neighbouring sections during scroll */
   contain: layout;
 }
-.scene__layer {
+
+/* Photo layer — overflows the scene vertically so parallax has room */
+.scene__photo {
   position: absolute;
-  inset: 0;
+  inset: -15% 0;          /* 15% extra top+bottom = 30% extra height */
   width: 100%;
-  height: 100%;
   will-change: transform;
   transform: translate3d(0,0,0);
-  /* Allow browser to handle vertical scroll on touch without
-     blocking the scroll event for the parallax */
-  touch-action: pan-y;
 }
-.scene__layer svg {
+.scene__photo img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
-.scene__layer--back  { z-index:1; }
-.scene__layer--mid   { z-index:2; }
-.scene__layer--front { z-index:3; }
 
-/* Content block: opacity-only reveal.
-   No transform here — avoids conflict with JS transform on layers.
-   The entrance is a clean fade; parallax lives only on the layers. */
+/* Gradient overlays — give text contrast + mood per scene */
+.scene__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+/* Dark scenes: dark gradient at bottom for card readability */
+.scene__overlay--dark {
+  background:
+    linear-gradient(to bottom,
+      rgba(4,8,12,0.30) 0%,
+      rgba(4,8,12,0.10) 40%,
+      rgba(4,8,12,0.55) 75%,
+      rgba(4,8,12,0.80) 100%);
+}
+.scene__overlay--canyon {
+  background:
+    linear-gradient(to bottom,
+      rgba(8,18,28,0.25) 0%,
+      rgba(8,18,28,0.05) 35%,
+      rgba(8,18,28,0.50) 70%,
+      rgba(8,18,28,0.78) 100%);
+}
+.scene__overlay--cold {
+  background:
+    linear-gradient(to bottom,
+      rgba(10,18,28,0.20) 0%,
+      rgba(10,18,28,0.05) 35%,
+      rgba(10,18,28,0.52) 70%,
+      rgba(10,18,28,0.82) 100%);
+}
+.scene__overlay--night {
+  background:
+    linear-gradient(to bottom,
+      rgba(2,4,10,0.35) 0%,
+      rgba(2,4,10,0.08) 30%,
+      rgba(2,4,10,0.55) 68%,
+      rgba(2,4,10,0.88) 100%);
+}
+.scene__overlay--summit {
+  background:
+    linear-gradient(to bottom,
+      rgba(30,8,4,0.15) 0%,
+      rgba(30,8,4,0.00) 30%,
+      rgba(20,8,4,0.45) 68%,
+      rgba(10,4,2,0.80) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. TREKKER FIGURE
+   — Positioned at bottom-left of each scene
+   — Walks bob animation always running
+   — JS nudges horizontal position based on scroll progress
+     within the section, so they appear to traverse the scene
+═══════════════════════════════════════════════════════════════ */
+.scene__trekker {
+  position: absolute;
+  bottom: clamp(7rem, 14vh, 12rem);  /* sit above the card area */
+  left: 8%;
+  z-index: 3;
+  transform: translateX(0);
+  will-change: transform;
+  transition: none;
+  filter: drop-shadow(2px 8px 16px rgba(0,0,0,0.55));
+}
+.trekker__figure {
+  display: block;
+  width: clamp(60px, 8vw, 110px);
+  height: auto;
+  animation: trek-walk 0.55s steps(1) infinite;
+  image-rendering: crisp-edges;
+}
+
+/* Walking bob — alternates lean and height every half-step */
+@keyframes trek-walk {
+  0%   { transform: translateY(0)   rotate(-1deg) scaleX(1); }
+  25%  { transform: translateY(-4px) rotate(0deg)  scaleX(1); }
+  50%  { transform: translateY(-2px) rotate(1deg)  scaleX(1); }
+  75%  { transform: translateY(-6px) rotate(0deg)  scaleX(1); }
+  100% { transform: translateY(0)   rotate(-1deg) scaleX(1); }
+}
+
+/* Smooth walking animation variant */
+@keyframes trek-walk-smooth {
+  0%   { transform: translateY(0px)  rotate(-1.5deg); }
+  20%  { transform: translateY(-5px) rotate(0deg); }
+  40%  { transform: translateY(-2px) rotate(1.5deg); }
+  60%  { transform: translateY(-6px) rotate(0deg); }
+  80%  { transform: translateY(-3px) rotate(-1deg); }
+  100% { transform: translateY(0px)  rotate(-1.5deg); }
+}
+.trekker__figure { animation: trek-walk-smooth 0.9s ease-in-out infinite; }
+
+/* Cold/night tint variants */
+.trekker__figure--cold  { filter: brightness(0.9) saturate(0.8); }
+.trekker__figure--night { filter: brightness(0.6) saturate(0.5); }
+.trekker__figure--summit { filter: brightness(1.1) saturate(1.2) sepia(0.15); }
+
+/* Ground shadow under trekker */
+.trekker__shadow {
+  width: 70%;
+  height: 8px;
+  margin: -2px auto 0;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.45) 0%, transparent 75%);
+  border-radius: 50%;
+  animation: shadow-pulse 0.9s ease-in-out infinite;
+}
+@keyframes shadow-pulse {
+  0%,100% { transform: scaleX(1);    opacity:0.5; }
+  50%      { transform: scaleX(0.7); opacity:0.3; }
+}
+.trekker__shadow--night  { background: radial-gradient(ellipse,rgba(0,0,0,0.3) 0%,transparent 75%); }
+.trekker__shadow--summit { background: radial-gradient(ellipse,rgba(200,120,40,0.35) 0%,transparent 75%); }
+
+/* ── 9. Scene content block & card ──────────────────────────── */
 .scene__content {
   position: relative;
   z-index: 4;
@@ -436,71 +452,52 @@ img,svg { display:block; max-width:100%; }
 }
 .scene__content.is-visible { opacity:1; }
 
-/* Glassmorphism card */
 .scene__card {
   width: min(34rem,96vw);
   padding: clamp(1.2rem,2.5vw,1.6rem) clamp(1.1rem,2.5vw,1.8rem);
   border-radius: var(--radius-card);
   background: var(--panel-dark);
   border: 1px solid var(--border-dark);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.4),
-    0 1px 0 rgba(255,255,255,0.06) inset;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 }
 .scene__card--light {
   background: var(--panel-light);
   color: #101418;
   border-color: var(--border-light);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.22),
-    0 1px 0 rgba(255,255,255,0.5) inset;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.5) inset;
 }
 .scene__card--summit {
-  background: rgba(20,12,4,0.82);
-  border-color: rgba(242,178,78,0.3);
-  box-shadow:
-    0 8px 48px rgba(242,178,78,0.2),
-    0 1px 0 rgba(242,178,78,0.12) inset;
+  background: rgba(20,10,4,0.82);
+  border-color: rgba(242,178,78,0.35);
+  box-shadow: 0 8px 48px rgba(242,178,78,0.22), 0 1px 0 rgba(242,178,78,0.12) inset;
 }
-/* Card typography */
 .scene__tag {
   font-family: var(--font-mono);
-  font-size: clamp(0.65rem,1.2vw,0.72rem);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.65rem;
-  opacity: 0.9;
+  font-size: clamp(0.62rem,1.2vw,0.72rem);
+  letter-spacing: 0.2em; text-transform:uppercase;
+  color: var(--accent); margin-bottom:0.65rem; opacity:0.9;
 }
 .scene__card--light .scene__tag { color:#a0600a; }
 .scene h2 {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(1.8rem,3.5vw,2.8rem);
-  line-height: 1;
-  margin-bottom: 0.55rem;
-  letter-spacing: -0.01em;
+  line-height: 1; margin-bottom:0.55rem; letter-spacing:-0.01em;
 }
 .scene__subheading {
   font-size: clamp(0.92rem,1.5vw,1rem);
-  font-weight: 600;
-  margin-bottom: 0.55rem;
-  opacity: 0.85;
+  font-weight: 600; margin-bottom:0.55rem; opacity:0.85;
 }
 .scene__body {
   font-size: clamp(0.88rem,1.4vw,0.96rem);
-  line-height: 1.75;
-  opacity: 0.78;
-  margin-bottom: 1rem;
+  line-height:1.75; opacity:0.78; margin-bottom:1rem;
 }
 .scene__meta {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-top: 0.8rem;
-  border-top: 1px solid var(--border-dark);
+  display:flex; gap:1rem; flex-wrap:wrap;
+  padding-top:0.8rem;
+  border-top:1px solid var(--border-dark);
 }
 .scene__card--light .scene__meta { border-top-color:var(--border-light); }
 .scene__card--summit .scene__meta { border-top-color:rgba(242,178,78,0.2); }
@@ -508,9 +505,7 @@ img,svg { display:block; max-width:100%; }
   font-family: var(--font-mono);
   font-size: clamp(0.7rem,1.2vw,0.78rem);
   color: var(--text-muted);
-  display: flex;
-  gap: 0.3rem;
-  align-items: baseline;
+  display:flex; gap:0.3rem; align-items:baseline;
 }
 .scene__stat strong { color:var(--accent); font-weight:500; }
 .scene__card--light .scene__stat { color:rgba(0,0,0,0.55); }
@@ -518,114 +513,63 @@ img,svg { display:block; max-width:100%; }
 .scene__card--summit .scene__stat { color:rgba(240,236,228,0.55); }
 .scene__card--summit .scene__stat strong { color:#ffd980; }
 
-/* Scene backgrounds — Khumbu region photographic palette */
-/* Forest: warm morning mist in a narrow river valley */
-.scene--forest    { background:linear-gradient(180deg,#4e7080 0%,#3a5a48 32%,#1e3820 62%,#0c1a10 100%); }
-/* Namche: high-altitude clear blue, glacial turquoise canyon */
-.scene--waterfall { background:linear-gradient(180deg,#2a4e6e 0%,#3e6278 28%,#486472 55%,#1c2a30 100%); }
-/* Tengboche: deep clear blue sky above treeline */
-.scene--cliff     { background:linear-gradient(180deg,#1c3654 0%,#2e4e6a 22%,#4e5e50 55%,#262c18 100%); }
-/* Lobuche: cold steel-blue, high-altitude grey */
-.scene--snow      { background:linear-gradient(180deg,#243444 0%,#364c5e 24%,#505856 55%,#2e2820 100%); }
-/* EBC night: near-black, deep navy starfield */
-.scene--night     { background:linear-gradient(180deg,#03060e 0%,#060a18 38%,#080c1c 68%,#040608 100%); }
-/* Kala Patthar: purple-orange-gold sunrise drama */
-.scene--summit    { background:linear-gradient(180deg,#3c1442 0%,#821e28 16%,#c84010 36%,#e07820 55%,#962010 74%,#160804 100%); }
-
-/* ── 8. Footer ───────────────────────────────────────────────── */
+/* ── 10. Footer ──────────────────────────────────────────────── */
 .footer {
   padding: clamp(1.5rem,4vh,2.5rem) clamp(1rem,4vw,2rem);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  border-top: 1px solid var(--border-dark);
-  background: #04070a;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:1rem;
+  border-top:1px solid var(--border-dark); background:#04070a;
 }
 .footer__credit {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
+  font-family:var(--font-mono); font-size:0.75rem;
+  letter-spacing:0.08em; color:var(--text-muted);
 }
 .footer__back {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--accent);
-  letter-spacing: 0.06em;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  transition: opacity 0.2s;
+  font-family:var(--font-mono); font-size:0.75rem;
+  color:var(--accent); letter-spacing:0.06em;
+  min-height:44px; display:inline-flex; align-items:center;
+  transition:opacity 0.2s;
 }
 .footer__back:hover { opacity:0.7; }
 
 /* ═══════════════════════════════════════════════════════════════
-   9. RESPONSIVE
-   Breakpoints: 480 (small phone), 640 (large phone), 768 (tablet)
+   11. RESPONSIVE
 ═══════════════════════════════════════════════════════════════ */
-
-/* ── Small phones ≤ 480px ────────────────────────────────────── */
 @media (max-width:480px) {
   .hero__title { font-size: clamp(2rem,12vw,2.8rem); }
-  .hero__actions {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    max-width: 18rem;
-    margin: 0 auto;
-  }
-  .hero__cta,
-  .hero__ghost { width:100%; }
+  .hero__actions { flex-direction:column; align-items:stretch; width:100%; max-width:18rem; margin:0 auto; }
+  .hero__cta,.hero__ghost { width:100%; }
   .eyebrow__line { width:18px; }
-  .hero__glow--amber { width:280px; height:280px; }
-  .hero__glow--blue  { width:220px; height:220px; }
-  .scene__meta { gap:0.7rem; }
+  /* Trekker smaller on phones */
+  .trekker__figure { width: 52px; }
+  .scene__trekker { bottom: 8rem; }
 }
-
-/* ── Large phones ≤ 640px ────────────────────────────────────── */
 @media (max-width:640px) {
   .hero__lead { font-size:0.92rem; line-height:1.7; }
   .scene h2 { font-size: clamp(1.6rem,6vw,2rem); }
-  .scene__body { font-size:0.88rem; }
 }
-
-/* ── Tablet / nav-hide ≤ 768px ───────────────────────────────── */
 @media (max-width:768px) {
-  .nav-dots  { display:none; }
-  .alt-hud   { display:none; }
-  .footer    { flex-direction:column; text-align:center; }
+  .nav-dots { display:none; }
+  .alt-hud  { display:none; }
+  .footer   { flex-direction:column; text-align:center; }
+  /* On mobile keep trekker but smaller + centred */
+  .scene__trekker { left: 5%; bottom: 9rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   10. REDUCED MOTION
-   Disable ALL keyframe animations + long transitions.
-   Content and layout remain fully readable.
+   12. REDUCED MOTION
 ═══════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion:reduce) {
-  /* Suppress entrance animations */
   .hero__title-line,
-  .eyebrow,
-  .hero__lead,
-  .hero__actions,
-  .hero__scroll-hint {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
+  .eyebrow,.hero__lead,.hero__actions,.hero__scroll-hint {
+    animation:none !important; opacity:1 !important; transform:none !important;
   }
-  /* Suppress ambient glows */
-  .hero__glow--amber,
-  .hero__glow--blue { animation:none; }
-  /* Suppress hiker bob */
+  .hero__glow--amber,.hero__glow--blue { animation:none; }
   .alt-hud__hiker { animation:none; }
-  /* Suppress scroll hint pulse */
   .hero__scroll-hint-arrow { animation:none; }
-  /* Suppress progress shimmer */
   .progress-bar span { animation:none; }
-  /* Show scene content immediately */
   .scene__content { opacity:1; transition:none; }
-  /* Disable hover lift */
-  .hero__cta:hover,
-  .hero__ghost:hover { transform:none; }
+  .trekker__figure { animation:none !important; }
+  .trekker__shadow { animation:none !important; }
+  .hero__cta:hover,.hero__ghost:hover { transform:none; }
 }
