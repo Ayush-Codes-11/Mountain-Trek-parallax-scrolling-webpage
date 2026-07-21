@@ -85,8 +85,10 @@
 
     <!-- Mobile altitude pill — shown only on ≤768px via CSS.
          JS writes alt value here inside updateHUD(), reusing the same lerp calculation.
-         aria-live="polite" so screen readers announce changes without interrupting. -->
-    <div id="hud-mobile" class="hud-mobile" aria-label="Current altitude" aria-live="polite">
+         aria-hidden="true": the pill updates on every scroll frame, so aria-live would
+         cause VoiceOver/TalkBack to announce a new number continuously while scrolling.
+         The real accessible altitude already lives in each scene card's static text. -->
+    <div id="hud-mobile" class="hud-mobile" aria-hidden="true">
       <span class="hud-mobile__label">ALT</span>
       <span id="hud-mobile-value">2,860</span>
       <span class="hud-mobile__unit">m</span>
