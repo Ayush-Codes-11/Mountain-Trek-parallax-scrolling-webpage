@@ -461,7 +461,56 @@ img { display: block; max-width: 100%; }
 }
 .footer__back:hover { opacity: 0.7; }
 
-/* ── 11. Responsive ──────────────────────────────────────────── */
+/* ── 10.5. Focus-visible — keyboard ring only (not on mouse clicks) ── */
+/* Uses :focus-visible so mouse users never see the ring; keyboard/tab users always do.
+   Colour uses existing --accent design token so it follows theme changes automatically. */
+.nav-dot:focus-visible,
+.hero__cta:focus-visible,
+.hero__ghost:focus-visible,
+.footer__back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+/* Round the ring on the circular nav dot so it isn't clipped by the element's border-radius */
+.nav-dot:focus-visible    { border-radius: 50%; }
+.footer__back:focus-visible { border-radius: 4px; }
+
+/* ── 10.6. Mobile altitude HUD pill ── */
+/* On small screens the fixed left-side HUD is hidden. This pill sits fixed
+   at top-right and mirrors the desktop altitude in a compact amber chip.
+   JS writes to #hud-mobile-value inside updateHUD() — no math duplication. */
+.hud-mobile {
+  display: none;                      /* hidden by default; media query reveals it */
+  position: fixed;
+  top: 0.8rem;
+  right: 0.8rem;
+  z-index: 200;
+  align-items: center;
+  gap: 0.25em;
+  background: rgba(6,9,12,0.78);
+  border: 1px solid rgba(242,178,78,0.35);
+  border-radius: 20px;
+  padding: 0.3em 0.75em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;               /* never blocks taps */
+}
+.hud-mobile__label {
+  font-size: 0.6rem;
+  opacity: 0.65;
+  margin-right: 0.15em;
+}
+.hud-mobile__unit  { opacity: 0.7; }
+
+@media (max-width: 768px) {
+  .hud-mobile { display: flex; }
+}
+
+
 @media (max-width: 480px) {
   .hero__title     { font-size: clamp(2rem,12vw,2.8rem); }
   .eyebrow__line   { width: 18px; }

@@ -30,8 +30,14 @@
     <meta name="twitter:description" content="Immersive parallax scrolling — six Himalayan scenes, live altitude tracker, 60 fps." />
     <meta name="twitter:image"       content="https://ayush-codes-11.github.io/Mountain-Trek-parallax-scrolling-webpage/screenshots/preview.png" />
 
-    <!-- Preload the first above-the-fold scene photo to avoid LCP delay -->
-    <link rel="preload" as="image" href="img/s1-forest.jpg" />
+    <!-- Preload first scene — imagesrcset lets the browser pick the right WebP/size
+         before the stylesheet is parsed, eliminating LCP delay. -->
+    <link rel="preload" as="image"
+          href="img/optimized/s1-forest-1024.jpg"
+          imagesrcset="img/optimized/s1-forest-480.webp 480w,
+                       img/optimized/s1-forest-768.webp 768w,
+                       img/optimized/s1-forest-1024.webp 1024w"
+          imagesizes="100vw" />
 
     <!-- Google Fonts: display=optional avoids FOIT and doesn't block render -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -77,6 +83,15 @@
       </div>
     </aside>
 
+    <!-- Mobile altitude pill — shown only on ≤768px via CSS.
+         JS writes alt value here inside updateHUD(), reusing the same lerp calculation.
+         aria-live="polite" so screen readers announce changes without interrupting. -->
+    <div id="hud-mobile" class="hud-mobile" aria-label="Current altitude" aria-live="polite">
+      <span class="hud-mobile__label">ALT</span>
+      <span id="hud-mobile-value">2,860</span>
+      <span class="hud-mobile__unit">m</span>
+    </div>
+
     <!-- ══ HERO ══════════════════════════════════════════════════ -->
     <header class="hero" id="top">
       <canvas class="hero__stars" id="hero-stars" aria-hidden="true"></canvas>
@@ -121,8 +136,19 @@
       <section class="scene" id="forest">
         <!-- loading="eager" so the first scene isn't lazy-loaded (it's visible immediately) -->
         <div class="scene__photo" data-speed="0.25">
-          <img src="img/s1-forest.jpg" alt="Dense rhododendron forest trail in the Khumbu Valley, Nepal"
-               width="1920" height="1080" loading="eager" decoding="async">
+          <picture>
+            <source type="image/webp" sizes="100vw"
+              srcset="img/optimized/s1-forest-480.webp 480w,
+                      img/optimized/s1-forest-768.webp 768w,
+                      img/optimized/s1-forest-1024.webp 1024w">
+            <source type="image/jpeg" sizes="100vw"
+              srcset="img/optimized/s1-forest-480.jpg 480w,
+                      img/optimized/s1-forest-768.jpg 768w,
+                      img/optimized/s1-forest-1024.jpg 1024w">
+            <img src="img/optimized/s1-forest-1024.jpg"
+                 alt="Dense rhododendron forest trail in the Khumbu Valley, Nepal"
+                 width="1024" height="1024" loading="eager" decoding="async">
+          </picture>
         </div>
         <div class="scene__overlay scene__overlay--dark"></div>
 
@@ -144,8 +170,19 @@
       <!-- Scene 2: Namche Canyon (~3,440 m) -->
       <section class="scene" id="waterfall">
         <div class="scene__photo" data-speed="0.22">
-          <img src="img/s2-canyon.jpg" alt="Dudh Kosi river gorge with snow-capped peaks above, Namche Bazaar area"
-               width="1920" height="1080" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/webp" sizes="100vw"
+              srcset="img/optimized/s2-canyon-480.webp 480w,
+                      img/optimized/s2-canyon-768.webp 768w,
+                      img/optimized/s2-canyon-1024.webp 1024w">
+            <source type="image/jpeg" sizes="100vw"
+              srcset="img/optimized/s2-canyon-480.jpg 480w,
+                      img/optimized/s2-canyon-768.jpg 768w,
+                      img/optimized/s2-canyon-1024.jpg 1024w">
+            <img src="img/optimized/s2-canyon-1024.jpg"
+                 alt="Dudh Kosi river gorge with snow-capped peaks above, Namche Bazaar area"
+                 width="1024" height="1024" loading="lazy" decoding="async">
+          </picture>
         </div>
         <div class="scene__overlay scene__overlay--canyon"></div>
 
@@ -167,8 +204,19 @@
       <!-- Scene 3: Tengboche / Ama Dablam (~3,867 m) -->
       <section class="scene" id="cliff">
         <div class="scene__photo" data-speed="0.20">
-          <img src="img/s3-tengboche.jpg" alt="Ama Dablam peak above Tengboche alpine meadow, Nepal"
-               width="1920" height="1080" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/webp" sizes="100vw"
+              srcset="img/optimized/s3-tengboche-480.webp 480w,
+                      img/optimized/s3-tengboche-768.webp 768w,
+                      img/optimized/s3-tengboche-1024.webp 1024w">
+            <source type="image/jpeg" sizes="100vw"
+              srcset="img/optimized/s3-tengboche-480.jpg 480w,
+                      img/optimized/s3-tengboche-768.jpg 768w,
+                      img/optimized/s3-tengboche-1024.jpg 1024w">
+            <img src="img/optimized/s3-tengboche-1024.jpg"
+                 alt="Ama Dablam peak above Tengboche alpine meadow, Nepal"
+                 width="1024" height="1024" loading="lazy" decoding="async">
+          </picture>
         </div>
         <div class="scene__overlay scene__overlay--dark"></div>
 
@@ -190,8 +238,19 @@
       <!-- Scene 4: Lobuche / Glacier Moraine (~4,940 m) -->
       <section class="scene" id="snow">
         <div class="scene__photo" data-speed="0.18">
-          <img src="img/s4-moraine.jpg" alt="Khumbu glacier moraine with massive Nuptse ice wall, Lobuche Nepal"
-               width="1920" height="1080" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/webp" sizes="100vw"
+              srcset="img/optimized/s4-moraine-480.webp 480w,
+                      img/optimized/s4-moraine-768.webp 768w,
+                      img/optimized/s4-moraine-1024.webp 1024w">
+            <source type="image/jpeg" sizes="100vw"
+              srcset="img/optimized/s4-moraine-480.jpg 480w,
+                      img/optimized/s4-moraine-768.jpg 768w,
+                      img/optimized/s4-moraine-1024.jpg 1024w">
+            <img src="img/optimized/s4-moraine-1024.jpg"
+                 alt="Khumbu glacier moraine with massive Nuptse ice wall, Lobuche Nepal"
+                 width="1024" height="1024" loading="lazy" decoding="async">
+          </picture>
         </div>
         <div class="scene__overlay scene__overlay--cold"></div>
 
@@ -213,8 +272,19 @@
       <!-- Scene 5: Everest Base Camp Night (~5,364 m) -->
       <section class="scene" id="night">
         <div class="scene__photo" data-speed="0.15">
-          <img src="img/s5-night.jpg" alt="Everest Base Camp at night with glowing tents and Milky Way"
-               width="1920" height="1080" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/webp" sizes="100vw"
+              srcset="img/optimized/s5-night-480.webp 480w,
+                      img/optimized/s5-night-768.webp 768w,
+                      img/optimized/s5-night-1024.webp 1024w">
+            <source type="image/jpeg" sizes="100vw"
+              srcset="img/optimized/s5-night-480.jpg 480w,
+                      img/optimized/s5-night-768.jpg 768w,
+                      img/optimized/s5-night-1024.jpg 1024w">
+            <img src="img/optimized/s5-night-1024.jpg"
+                 alt="Everest Base Camp at night with glowing tents and Milky Way"
+                 width="1024" height="1024" loading="lazy" decoding="async">
+          </picture>
         </div>
         <div class="scene__overlay scene__overlay--night"></div>
 
@@ -236,8 +306,19 @@
       <!-- Scene 6: Kala Patthar Sunrise (~5,644 m) -->
       <section class="scene" id="summit">
         <div class="scene__photo" data-speed="0.12">
-          <img src="img/s6-sunrise.jpg" alt="Sunrise from Kala Patthar with Everest silhouette and prayer flags"
-               width="1920" height="1080" loading="lazy" decoding="async">
+          <picture>
+            <source type="image/webp" sizes="100vw"
+              srcset="img/optimized/s6-sunrise-480.webp 480w,
+                      img/optimized/s6-sunrise-768.webp 768w,
+                      img/optimized/s6-sunrise-1024.webp 1024w">
+            <source type="image/jpeg" sizes="100vw"
+              srcset="img/optimized/s6-sunrise-480.jpg 480w,
+                      img/optimized/s6-sunrise-768.jpg 768w,
+                      img/optimized/s6-sunrise-1024.jpg 1024w">
+            <img src="img/optimized/s6-sunrise-1024.jpg"
+                 alt="Sunrise from Kala Patthar with Everest silhouette and prayer flags"
+                 width="1024" height="1024" loading="lazy" decoding="async">
+          </picture>
         </div>
         <div class="scene__overlay scene__overlay--summit"></div>
 

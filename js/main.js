@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const altMarker     = document.getElementById('alt-marker');
   const altValue      = document.getElementById('alt-value');
   const altTrack      = document.querySelector('.alt-hud__track');
+  const hudMobileValue = document.getElementById('hud-mobile-value'); // mobile pill
   const cursorGlow    = document.getElementById('cursor-glow');
   const heroEl        = document.querySelector('.hero');
   const heroStars     = document.getElementById('hero-stars');
@@ -213,6 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
     altMarker.style.bottom = `${pct.toFixed(2)}%`;
     altValue.textContent   = alt.toLocaleString('en-US');
     altTrack.setAttribute('aria-valuenow', alt);
+
+    // Mobile pill — same alt, no separate math; only updates if element exists
+    if (hudMobileValue) hudMobileValue.textContent = alt.toLocaleString('en-US');
   }
 
   /* ═══════════════════════════════════════════════════════════
