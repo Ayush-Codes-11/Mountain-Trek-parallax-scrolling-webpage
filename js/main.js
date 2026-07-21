@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const navDots       = Array.from(document.querySelectorAll('.nav-dot'));
   const scenes        = Array.from(document.querySelectorAll('.scene'));
   const sceneContents = Array.from(document.querySelectorAll('.scene__content'));
-  const trekkers      = [];
 
   // Cache photo layer refs AND their data-speed values once — avoid
   // repeated querySelector + parseFloat inside the hot scroll loop.
