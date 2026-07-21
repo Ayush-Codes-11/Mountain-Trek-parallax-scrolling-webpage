@@ -317,13 +317,17 @@ img { display: block; max-width: 100%; }
   contain: layout;   /* isolates layout recalcs to this subtree */
 }
 
-/* Photo layer: -15% vertical inset gives 30% extra height for parallax travel */
+/* Photo layer: -15% vertical inset gives 30% extra height for parallax travel.
+   Background gradient shows if the image fails to load (onerror hides broken img). */
 .scene__photo {
   position: absolute;
   inset: -15% 0;
   width: 100%;
-  will-change: transform;            /* compositor-only — JS drives translate3d */
-  transform: translate3d(0,0,0);     /* initial GPU layer promotion */
+  will-change: transform;
+  transform: translate3d(0,0,0);
+  /* Fallback shown when image src fails — dark cinematic gradient keeps the
+     section legible without a jarring broken-image icon */
+  background: linear-gradient(160deg, #0c1620 0%, #0d1a24 50%, #070c10 100%);
 }
 .scene__photo img {
   width: 100%; height: 100%;

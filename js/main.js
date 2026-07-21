@@ -275,6 +275,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 150);
   }, { passive: true });
 
+  // Image load-error fallback — if a scene photo 404s or fails to decode,
+  // fade it out so the CSS gradient fallback on .scene__photo shows instead
+  // of a broken-image icon spanning the full viewport.
+  document.querySelectorAll('.scene__photo img').forEach(img => {
+    img.addEventListener('error', () => {
+      img.style.opacity = '0';
+    }, { once: true });
+  });
+
   // Window load — fires AFTER all images (including lazy ones) have loaded
   // and the browser has computed the final document height.
   // This is the primary fix for maxScroll being 0 at DOMContentLoaded.
