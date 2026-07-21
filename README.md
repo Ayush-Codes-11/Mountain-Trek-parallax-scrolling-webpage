@@ -44,7 +44,39 @@ An immersive, award-winning parallax scrolling experience that takes you through
 | Images | AI-generated photorealistic Himalayan scenes |
 | Hosting | GitHub Pages |
 
-No frameworks. No build step. No dependencies.
+No frameworks. No build step. No dependencies. The best technology depends on the problem — for a static, animation-heavy display site, vanilla JS keeps the bundle minimal and the scroll loop direct.
+
+---
+
+## ⚙️ How the Parallax Works
+
+Each scene has a background photo layer that overflows the section by 15% top and bottom, giving it extra height to travel within. On every scroll event, a single `requestAnimationFrame` call reads all six sections' positions via `getBoundingClientRect()` in one batch, then writes a `translate3d(0, offset, 0)` transform to each photo layer — where `offset = -top × speed`.
+
+The `speed` value decreases with each section to mirror the slower pace of real high-altitude trekking:
+
+| Scene | Speed | Rationale |
+|-------|-------|-----------|
+| Forest | 0.25 | Low altitude — fast, lush, energetic |
+| Canyon | 0.22 | |
+| Tengboche | 0.20 | |
+| Moraine | 0.18 | |
+| Base Camp | 0.15 | |
+| Kala Patthar | 0.12 | High altitude — slow, thin air, deliberate |
+
+The foreground info card sits in normal document flow and does not move. The speed difference between card and photo is what the eye perceives as depth.
+
+---
+
+## 🏎️ Performance
+
+- **Batch reads before writes** — all `getBoundingClientRect()` calls happen before any `style` writes per frame, preventing layout thrash
+- **Compositor-only transforms** — `translate3d` and `scaleX` keep animations on the GPU thread; no `top`, `left`, or `height` changes trigger repaints in the scroll loop
+- **`will-change: transform`** on photo layers — promotes them to compositor layers ahead of time
+- **RAF throttle** — one DOM update per animation frame maximum, regardless of scroll event frequency
+- **`IntersectionObserver`** for content reveals and nav dots — no scroll-listener overhead for these
+- **`ResizeObserver`** on `document.documentElement` — recalculates `maxScroll` whenever the page height changes (e.g. after lazy images finish loading), fixing a bug where the altitude HUD would freeze at 2,860 m
+- **`loading="lazy"` + `decoding="async"`** on all scene images except the first
+- **`<link rel="preload">`** + `loading="eager"` on the first scene photo to eliminate LCP delay
 
 ---
 
@@ -81,6 +113,17 @@ Then open **http://localhost:8080** in your browser.
 └── screenshots/
     └── preview.png
 ```
+
+---
+
+## 🔭 Planned Improvements
+
+- Convert scene photos to **WebP** for ~50% smaller file sizes
+- **Preloader screen** while photos fetch on slow connections
+- **Ambient audio** per stage (forest birds, wind, glacier creak) fading between scenes
+- **Interactive topographic map** with a live position marker tracking current scroll position
+- **Keyboard navigation** — Tab through sections, Enter to activate nav dots
+- **Open Graph metadata** for rich link previews when the URL is shared
 
 ---
 
